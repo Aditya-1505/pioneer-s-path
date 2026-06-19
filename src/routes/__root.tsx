@@ -135,8 +135,10 @@ function RootComponent() {
         <CursorTrail />
         {!bare && <AnnouncementBanner />}
         {!bare && <Navbar />}
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
+        <div className={!bare ? "pb-16 sm:pb-0" : undefined}>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+        </div>
         {!bare && <Footer />}
         {!bare && <FloatingButtons />}
         <Toaster position="top-center" richColors />
