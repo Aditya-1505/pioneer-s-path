@@ -1,47 +1,78 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import { MapPin, ArrowRight, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MapPin, ArrowRight, ZoomIn, ZoomOut, RotateCcw, X, Sparkles, Users, Clock } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { supabase } from "@/integrations/supabase/client";
 
-type Spot = { key: string; name: string; emoji: string; x: number; y: number };
+type Spot = {
+  key: string;
+  name: string;
+  emoji: string;
+  blurb: string;
+  // Position in normalized SVG coords (viewBox 0 0 100 120)
+  x: number;
+  y: number;
+};
 
-// Approximate positions (%) over the India map image
 const SPOTS: Spot[] = [
-  { key: "kashmir", name: "Kashmir", emoji: "🏔️", x: 30, y: 12 },
-  { key: "ladakh", name: "Ladakh", emoji: "🛕", x: 40, y: 16 },
-  { key: "spiti", name: "Spiti", emoji: "⛰️", x: 38, y: 23 },
-  { key: "manali", name: "Manali", emoji: "🌲", x: 35, y: 26 },
-  { key: "goa", name: "Goa", emoji: "🏖️", x: 30, y: 70 },
-  { key: "kerala", name: "Kerala", emoji: "🌴", x: 37, y: 88 },
+  { key: "kashmir", name: "Kashmir", emoji: "🏔️", blurb: "Dal Lake, Gulmarg & Pahalgam", x: 32, y: 14 },
+  { key: "ladakh",  name: "Ladakh",  emoji: "🛕", blurb: "Pangong, Nubra & Leh monasteries", x: 44, y: 18 },
+  { key: "spiti",   name: "Spiti",   emoji: "⛰️", blurb: "High-altitude desert road trip",   x: 40, y: 26 },
+  { key: "manali",  name: "Manali",  emoji: "🌲", blurb: "Solang, Sissu & Atal Tunnel",       x: 36, y: 30 },
+  { key: "meghalaya", name: "Meghalaya", emoji: "🌧️", blurb: "Living root bridges & Cherrapunji", x: 78, y: 44 },
+  { key: "goa",     name: "Goa",     emoji: "🏖️", blurb: "Beaches, cafes & sunset cruises",  x: 32, y: 75 },
+  { key: "kerala",  name: "Kerala",  emoji: "🌴", blurb: "Backwaters, Munnar & Alleppey",     x: 40, y: 96 },
 ];
 
-const MAP_IMG =
-  "https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/India_administrative_divisions_blank.svg/640px-India_administrative_divisions_blank.svg.png";
+type Tour = {
+  slug: string;
+  title: string;
+  destination: string | null;
+  price: number | null;
+  duration: string | null;
+  seats_available: number | null;
+};
 
 export function IndiaMap() {
   const navigate = useNavigate();
-  const [tourByDest, setTourByDest] = useState<Record<string, string>>({});
+  const [tours, setTours] = useState<Tour[]>([]);
   const [active, setActive] = useState<Spot | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const dragRef = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
 
   useEffect(() => {
     supabase
       .from("tours")
-      .select("slug,destination")
+      .select("slug,title,destination,price,duration,seats_available")
       .eq("status", "published")
-      .then(({ data }) => {
-        const map: Record<string, string> = {};
-        (data ?? []).forEach((t: any) => {
-          if (t.destination) map[t.destination.toLowerCase()] = t.slug;
-        });
-        setTourByDest(map);
-      });
+      .then(({ data }) => setTours((data as Tour[]) ?? []));
   }, []);
 
-  const go = (spot: Spot) => {
-    const slug = Object.entries(tourByDest).find(([d]) => d.includes(spot.key))?.[1];
-    if (slug) navigate({ to: "/tours/$slug", params: { slug } });
+  const tourFor = (spot: Spot) =>
+    tours.find((t) => (t.destination ?? "").toLowerCase().includes(spot.key));
+
+  const onWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    setZoom((z) => Math.max(1, Math.min(3, z + (e.deltaY < 0 ? 0.15 : -0.15))));
+  };
+  const onMouseDown = (e: React.MouseEvent) => {
+    dragRef.current = { startX: e.clientX, startY: e.clientY, panX: pan.x, panY: pan.y };
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (!dragRef.current) return;
+    setPan({
+      x: dragRef.current.panX + (e.clientX - dragRef.current.startX),
+      y: dragRef.current.panY + (e.clientY - dragRef.current.startY),
+    });
+  };
+  const endDrag = () => { dragRef.current = null; };
+  const reset = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
+
+  const handleView = (spot: Spot) => {
+    const t = tourFor(spot);
+    if (t) navigate({ to: "/tours/$slug", params: { slug: t.slug } });
     else navigate({ to: "/tours" });
   };
 
@@ -51,59 +82,140 @@ export function IndiaMap() {
         <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Explore the Map</span>
         <h2 className="mt-2 font-display text-3xl font-bold sm:text-5xl">Tap a Destination on India</h2>
         <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-          Click any glowing pin to open its curated packages.
+          Zoom, pan and click any glowing pin to see live trip details.
         </p>
       </Reveal>
 
-      <div className="grid items-center gap-8 lg:grid-cols-[1.2fr_1fr]">
+      <div className="grid items-start gap-8 lg:grid-cols-[1.3fr_1fr]">
         <Reveal>
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-md">
-            <img src={MAP_IMG} alt="Map of India" className="size-full object-contain opacity-80 dark:invert" />
-            {SPOTS.map((s) => {
-              const hasTour = Object.keys(tourByDest).some((d) => d.includes(s.key));
-              return (
-                <button
-                  key={s.key}
-                  onClick={() => go(s)}
-                  onMouseEnter={() => setActive(s)}
-                  onMouseLeave={() => setActive(null)}
-                  style={{ left: `${s.x}%`, top: `${s.y}%` }}
-                  className="group absolute -translate-x-1/2 -translate-y-1/2"
-                  aria-label={s.name}
-                >
-                  <span className="relative flex size-4">
-                    <span className={`absolute inline-flex size-full animate-ping rounded-full ${hasTour ? "bg-primary/60" : "bg-secondary/50"}`} />
-                    <span className={`relative inline-flex size-4 items-center justify-center rounded-full text-[8px] ${hasTour ? "bg-primary" : "bg-secondary"} text-white shadow-lg`}>
-                      <MapPin className="size-2.5" />
-                    </span>
-                  </span>
-                  <span className="absolute left-1/2 top-5 -translate-x-1/2 whitespace-nowrap rounded-full bg-card px-2 py-0.5 text-[10px] font-semibold opacity-0 shadow transition group-hover:opacity-100">
-                    {s.emoji} {s.name}
-                  </span>
-                </button>
-              );
-            })}
+          <div className="relative">
+            <div className="absolute right-3 top-3 z-10 flex flex-col gap-2">
+              <button onClick={() => setZoom((z) => Math.min(3, z + 0.25))} className="grid size-9 place-items-center rounded-full border bg-card shadow hover:bg-accent" aria-label="Zoom in"><ZoomIn className="size-4" /></button>
+              <button onClick={() => setZoom((z) => Math.max(1, z - 0.25))} className="grid size-9 place-items-center rounded-full border bg-card shadow hover:bg-accent" aria-label="Zoom out"><ZoomOut className="size-4" /></button>
+              <button onClick={reset} className="grid size-9 place-items-center rounded-full border bg-card shadow hover:bg-accent" aria-label="Reset"><RotateCcw className="size-4" /></button>
+            </div>
+
+            <div
+              className="relative aspect-[5/6] w-full cursor-grab overflow-hidden rounded-3xl border bg-gradient-to-br from-sky-50 to-emerald-50 active:cursor-grabbing dark:from-slate-900 dark:to-slate-800"
+              onWheel={onWheel}
+              onMouseDown={onMouseDown}
+              onMouseMove={onMouseMove}
+              onMouseUp={endDrag}
+              onMouseLeave={endDrag}
+            >
+              <div
+                className="absolute inset-0 origin-center transition-transform duration-150"
+                style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})` }}
+              >
+                <svg viewBox="0 0 100 120" className="size-full" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    <linearGradient id="indFill" x1="0" x2="1" y1="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(var(--primary) / 0.25)" />
+                      <stop offset="100%" stopColor="hsl(var(--secondary) / 0.18)" />
+                    </linearGradient>
+                  </defs>
+                  {/* Stylized India outline (simplified path) */}
+                  <path
+                    d="M40 6 L52 8 L58 14 L52 22 L60 26 L62 34 L72 36 L80 44 L74 50 L72 58 L66 64 L64 72 L58 78 L54 86 L52 96 L46 108 L42 116 L36 108 L34 96 L30 86 L26 76 L22 66 L24 56 L20 48 L24 38 L30 30 L28 22 L34 14 Z"
+                    fill="url(#indFill)"
+                    stroke="hsl(var(--primary) / 0.5)"
+                    strokeWidth="0.4"
+                    strokeLinejoin="round"
+                  />
+                  {SPOTS.map((s) => {
+                    const has = !!tourFor(s);
+                    return (
+                      <g key={s.key} transform={`translate(${s.x} ${s.y})`}>
+                        <circle r="3" className={has ? "fill-primary/30" : "fill-secondary/30"}>
+                          <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite" />
+                          <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+                        </circle>
+                        <circle
+                          r="1.6"
+                          className={`${has ? "fill-primary" : "fill-secondary"} cursor-pointer drop-shadow`}
+                          onClick={(e) => { e.stopPropagation(); setActive(s); }}
+                        />
+                        <text x="2.5" y="0.8" className="fill-foreground text-[2.2px] font-semibold" pointerEvents="none">
+                          {s.name}
+                        </text>
+                      </g>
+                    );
+                  })}
+                </svg>
+              </div>
+
+              {/* Popup card */}
+              <AnimatePresence>
+                {active && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 12 }}
+                    className="absolute bottom-4 left-4 right-4 z-20 mx-auto max-w-md rounded-2xl border bg-card/95 p-4 shadow-2xl backdrop-blur"
+                  >
+                    {(() => {
+                      const t = tourFor(active);
+                      return (
+                        <>
+                          <div className="flex items-start gap-3">
+                            <span className="text-3xl">{active.emoji}</span>
+                            <div className="flex-1">
+                              <h3 className="font-display text-lg font-bold">{active.name}</h3>
+                              <p className="text-xs text-muted-foreground">{active.blurb}</p>
+                            </div>
+                            <button onClick={() => setActive(null)} className="text-muted-foreground hover:text-foreground" aria-label="Close">
+                              <X className="size-4" />
+                            </button>
+                          </div>
+                          <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
+                            <div className="rounded-lg bg-muted p-2">
+                              <Sparkles className="mx-auto size-3.5 text-primary" />
+                              <p className="mt-1 font-semibold">{t?.price ? `₹${t.price.toLocaleString("en-IN")}` : "On request"}</p>
+                              <p className="text-[10px] text-muted-foreground">starting</p>
+                            </div>
+                            <div className="rounded-lg bg-muted p-2">
+                              <Clock className="mx-auto size-3.5 text-primary" />
+                              <p className="mt-1 font-semibold">{t?.duration ?? "Flexible"}</p>
+                              <p className="text-[10px] text-muted-foreground">duration</p>
+                            </div>
+                            <div className="rounded-lg bg-muted p-2">
+                              <Users className="mx-auto size-3.5 text-primary" />
+                              <p className="mt-1 font-semibold">{t?.seats_available ?? "—"}</p>
+                              <p className="text-[10px] text-muted-foreground">seats</p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleView(active)}
+                            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90"
+                          >
+                            View Trip <ArrowRight className="size-4" />
+                          </button>
+                        </>
+                      );
+                    })()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </Reveal>
 
         <Reveal delay={0.1}>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {SPOTS.map((s) => {
-              const hasTour = Object.keys(tourByDest).some((d) => d.includes(s.key));
+              const has = !!tourFor(s);
               return (
                 <motion.button
                   key={s.key}
                   whileHover={{ y: -3 }}
-                  onClick={() => go(s)}
+                  onClick={() => setActive(s)}
                   className={`flex items-center justify-between rounded-2xl border p-4 text-left transition ${
                     active?.key === s.key ? "border-primary bg-primary/5" : "bg-card"
                   }`}
                 >
                   <span>
                     <span className="font-display text-lg font-semibold">{s.emoji} {s.name}</span>
-                    <span className="block text-xs text-muted-foreground">
-                      {hasTour ? "Packages available" : "Enquire now"}
-                    </span>
+                    <span className="block text-xs text-muted-foreground">{has ? "Packages available" : "Enquire now"}</span>
                   </span>
                   <ArrowRight className="size-4 text-primary" />
                 </motion.button>
@@ -111,7 +223,7 @@ export function IndiaMap() {
             })}
           </div>
           <p className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Sparkles className="size-3.5 text-secondary" /> Pins in blue have live packages ready to book.
+            <MapPin className="size-3.5 text-primary" /> Tip: scroll to zoom, drag to pan, click a pin for details.
           </p>
         </Reveal>
       </div>

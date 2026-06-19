@@ -86,16 +86,31 @@ function GalleryPage() {
                 className="group relative break-inside-avoid overflow-hidden rounded-2xl border bg-card shadow-sm"
               >
                 {it.video_url ? (
-                  <a href={it.video_url} target="_blank" rel="noreferrer" className="block">
-                    <div className="relative">
-                      <img src={it.image_url ?? ""} alt={it.title ?? "Video"} loading="lazy" className="w-full object-cover" />
-                      <div className="absolute inset-0 grid place-items-center bg-foreground/20">
-                        <span className="grid size-14 place-items-center rounded-full bg-background/90 text-primary">
-                          <Play className="size-6" />
-                        </span>
-                      </div>
+                  <div
+                    className="relative cursor-pointer"
+                    onMouseEnter={(e) => {
+                      const v = e.currentTarget.querySelector("video");
+                      v?.play().catch(() => {});
+                    }}
+                    onMouseLeave={(e) => {
+                      const v = e.currentTarget.querySelector("video");
+                      if (v) { v.pause(); v.currentTime = 0; }
+                    }}
+                  >
+                    <video
+                      src={it.video_url}
+                      poster={it.image_url ?? undefined}
+                      muted
+                      loop
+                      playsInline
+                      preload="metadata"
+                      controls
+                      className="w-full bg-black object-cover"
+                    />
+                    <div className="pointer-events-none absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-background/90 text-primary shadow">
+                      <Play className="size-4" />
                     </div>
-                  </a>
+                  </div>
                 ) : (
                   <img
                     src={it.image_url ?? ""}
