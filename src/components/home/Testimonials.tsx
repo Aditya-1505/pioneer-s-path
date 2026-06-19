@@ -115,6 +115,10 @@ function VideoCarousel({ videos }: { videos: Testimonial[] }) {
             <video
               src={t.video_url!}
               poster={t.photo_url ?? undefined}
+              autoPlay
+              muted
+              loop
+              playsInline
               controls
               preload="metadata"
               className="h-56 w-full bg-black object-cover"
@@ -136,3 +140,4 @@ function VideoCarousel({ videos }: { videos: Testimonial[] }) {
     </div>
   );
 }
+

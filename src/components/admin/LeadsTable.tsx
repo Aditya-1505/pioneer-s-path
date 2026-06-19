@@ -4,35 +4,24 @@ import { Trash2, Loader2, Eye, ArrowUpDown, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import { LeadPriorityBadge } from "@/components/admin/LeadPriorityBadge";
 
 type Row = Record<string, any>;
 
 const STATUS_OPTIONS = ["new", "pending", "contacted", "confirmed", "closed", "cancelled"];
 
 export function LeadsTable({
-  table,
-  title,
-  columns,
-  statuses = STATUS_OPTIONS,
+  table, title, columns, statuses = STATUS_OPTIONS, budgetField,
 }: {
   table: string;
   title: string;
   columns: { key: string; label: string }[];
   statuses?: string[];
+  budgetField?: string;
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,8 +34,7 @@ export function LeadsTable({
   const load = () => {
     setLoading(true);
     supabase
-      .from(table as any)
-      .select("*")
+      .from(table as any).select("*")
       .order("created_at", { ascending: false })
       .then(({ data }) => {
         setRows((data as Row[]) ?? []);
@@ -54,6 +42,15 @@ export function LeadsTable({
       });
   };
   useEffect(load, [table]);
+
+  // realtime
+  useEffect(() => {
+    const ch = supabase
+      .channel(`leads-${table}`)
+      .on("postgres_changes", { event: "*", schema: "public", table }, () => load())
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [table]);
 
   const setStatus = async (id: string, status: string) => {
     const { error } = await supabase.from(table as any).update({ status }).eq("id", id);
@@ -70,12 +67,20 @@ export function LeadsTable({
     load();
   };
 
+  const openRecord = async (r: Row) => {
+    setView(r);
+    if (r.is_read === false) {
+      await supabase
+        .from(table as any)
+        .update({ is_read: true, read_at: new Date().toISOString() })
+        .eq("id", r.id);
+      setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, is_read: true } : x)));
+    }
+  };
+
   const toggleSort = (k: string) => {
     if (sortKey === k) setSortAsc((s) => !s);
-    else {
-      setSortKey(k);
-      setSortAsc(true);
-    }
+    else { setSortKey(k); setSortAsc(true); }
   };
 
   const visible = useMemo(() => {
@@ -83,23 +88,13 @@ export function LeadsTable({
     if (statusFilter !== "all") out = out.filter((r) => (r.status ?? "new") === statusFilter);
     if (query.trim()) {
       const q = query.toLowerCase();
-      out = out.filter((r) =>
-        columns.some((c) => String(r[c.key] ?? "").toLowerCase().includes(q)),
-      );
+      out = out.filter((r) => columns.some((c) => String(r[c.key] ?? "").toLowerCase().includes(q)));
     }
     out.sort((a, b) => {
-      let av = a[sortKey];
-      let bv = b[sortKey];
-      if (sortKey === "created_at") {
-        av = new Date(av ?? 0).getTime();
-        bv = new Date(bv ?? 0).getTime();
-      } else if (typeof av === "number" || !isNaN(Number(av))) {
-        av = Number(av ?? 0);
-        bv = Number(bv ?? 0);
-      } else {
-        av = String(av ?? "").toLowerCase();
-        bv = String(bv ?? "").toLowerCase();
-      }
+      let av = a[sortKey]; let bv = b[sortKey];
+      if (sortKey === "created_at") { av = new Date(av ?? 0).getTime(); bv = new Date(bv ?? 0).getTime(); }
+      else if (typeof av === "number" || !isNaN(Number(av))) { av = Number(av ?? 0); bv = Number(bv ?? 0); }
+      else { av = String(av ?? "").toLowerCase(); bv = String(bv ?? "").toLowerCase(); }
       if (av < bv) return sortAsc ? -1 : 1;
       if (av > bv) return sortAsc ? 1 : -1;
       return 0;
@@ -109,19 +104,15 @@ export function LeadsTable({
 
   const counts = useMemo(() => {
     const c: Record<string, number> = {};
-    rows.forEach((r) => {
-      const s = r.status ?? "new";
-      c[s] = (c[s] ?? 0) + 1;
-    });
+    rows.forEach((r) => { const s = r.status ?? "new"; c[s] = (c[s] ?? 0) + 1; });
     return c;
   }, [rows]);
 
+  const unreadCount = rows.filter((r) => r.is_read === false).length;
+
   const SortHead = ({ k, label }: { k: string; label: string }) => (
     <TableHead>
-      <button
-        onClick={() => toggleSort(k)}
-        className="inline-flex items-center gap-1 hover:text-foreground"
-      >
+      <button onClick={() => toggleSort(k)} className="inline-flex items-center gap-1 hover:text-foreground">
         {label}
         <ArrowUpDown className={`h-3 w-3 ${sortKey === k ? "text-primary" : "opacity-40"}`} />
       </button>
@@ -132,29 +123,23 @@ export function LeadsTable({
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-display text-xl font-bold">
-          {title} <span className="text-sm font-normal text-muted-foreground">({visible.length})</span>
+          {title}{" "}
+          <span className="text-sm font-normal text-muted-foreground">({visible.length})</span>
+          {unreadCount > 0 && (
+            <span className="ml-2 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">
+              {unreadCount} new
+            </span>
+          )}
         </h2>
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="h-9 w-44 pl-8"
-            />
+            <Input placeholder="Search…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-9 w-44 pl-8" />
           </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-9 rounded-md border bg-background px-2 text-sm capitalize"
-          >
+          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-9 rounded-md border bg-background px-2 text-sm capitalize">
             <option value="all">All statuses ({rows.length})</option>
-            {statuses.map((s) => (
-              <option key={s} value={s}>
-                {s} ({counts[s] ?? 0})
-              </option>
-            ))}
+            {statuses.map((s) => <option key={s} value={s}>{s} ({counts[s] ?? 0})</option>)}
           </select>
         </div>
       </div>
@@ -162,51 +147,44 @@ export function LeadsTable({
         <Table>
           <TableHeader>
             <TableRow>
-              {columns.map((c) => (
-                <SortHead key={c.key} k={c.key} label={c.label} />
-              ))}
+              {columns.map((c) => <SortHead key={c.key} k={c.key} label={c.label} />)}
+              {budgetField && <TableHead>Priority</TableHead>}
               <SortHead k="status" label="Status" />
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + 2} className="py-8 text-center">
-                  <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={columns.length + (budgetField ? 3 : 2)} className="py-8 text-center">
+                <Loader2 className="mx-auto h-5 w-5 animate-spin text-muted-foreground" />
+              </TableCell></TableRow>
             ) : visible.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length + 2} className="py-8 text-center text-muted-foreground">
-                  No records found.
-                </TableCell>
-              </TableRow>
+              <TableRow><TableCell colSpan={columns.length + (budgetField ? 3 : 2)} className="py-8 text-center text-muted-foreground">
+                No records found.
+              </TableCell></TableRow>
             ) : (
               visible.map((r) => (
-                <TableRow key={r.id}>
+                <TableRow key={r.id} className={r.is_read === false ? "bg-primary/5 font-medium" : ""}>
                   {columns.map((c) => (
                     <TableCell key={c.key} className="max-w-[200px] truncate">
                       {c.key === "created_at"
                         ? new Date(r[c.key]).toLocaleDateString("en-IN")
-                        : String(r[c.key] ?? "—")}
+                        : c.key === "name" && r.is_read === false
+                          ? <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-primary" />{String(r[c.key] ?? "—")}</span>
+                          : String(r[c.key] ?? "—")}
                     </TableCell>
                   ))}
+                  {budgetField && (
+                    <TableCell><LeadPriorityBadge budget={r[budgetField]} /></TableCell>
+                  )}
                   <TableCell>
-                    <select
-                      value={r.status ?? "new"}
-                      onChange={(e) => setStatus(r.id, e.target.value)}
-                      className="rounded-md border bg-background px-2 py-1 text-xs capitalize"
-                    >
-                      {statuses.map((s) => (
-                        <option key={s} value={s}>
-                          {s}
-                        </option>
-                      ))}
+                    <select value={r.status ?? "new"} onChange={(e) => setStatus(r.id, e.target.value)}
+                      className="rounded-md border bg-background px-2 py-1 text-xs capitalize">
+                      {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => setView(r)}>
+                    <Button variant="ghost" size="icon" onClick={() => openRecord(r)}>
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={() => remove(r.id)}>
@@ -223,12 +201,15 @@ export function LeadsTable({
       <Dialog open={!!view} onOpenChange={(o) => !o && setView(null)}>
         <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Record Details</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Record Details
+              {budgetField && view && <LeadPriorityBadge budget={view[budgetField]} />}
+            </DialogTitle>
           </DialogHeader>
           {view && (
             <div className="space-y-2 text-sm">
               {Object.entries(view)
-                .filter(([k]) => k !== "id")
+                .filter(([k]) => k !== "id" && k !== "is_read" && k !== "read_at")
                 .map(([k, v]) => (
                   <div key={k} className="flex gap-3 border-b py-1.5">
                     <span className="w-36 shrink-0 font-medium capitalize text-muted-foreground">
