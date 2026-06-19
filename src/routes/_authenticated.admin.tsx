@@ -22,7 +22,14 @@ export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
 });
 
-const SECTIONS = [
+type Section = {
+  id: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  unreadKey?: string;
+};
+
+const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "activity", label: "Activity Center", icon: Activity },
   { id: "tours", label: "Tours", icon: Map },
@@ -38,7 +45,8 @@ const SECTIONS = [
   { id: "team", label: "Team", icon: UsersRound },
   { id: "announcements", label: "Announcements", icon: Megaphone },
   { id: "subscribers", label: "Subscribers", icon: Mail, unreadKey: "subscribers" },
-] as const;
+];
+
 
 function AdminPage() {
   const navigate = useNavigate();
