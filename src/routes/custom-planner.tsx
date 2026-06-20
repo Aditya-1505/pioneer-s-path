@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2, ArrowRight, ArrowLeft, Check, Sparkles, MessageCircle } from "lucide-react";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND, BUDGETS, GROUP_TYPES, TRAVEL_VIBES, waLink } from "@/lib/brand";
 import { recommendDestinations } from "@/lib/destinations";
+import { usePrefill } from "@/hooks/use-prefill";
 
 export const Route = createFileRoute("/custom-planner")({
   head: () =>
@@ -47,6 +48,16 @@ function CustomPlanner() {
   const [form, setForm] = useState<Form>(empty);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const prefill = usePrefill();
+
+  useEffect(() => {
+    setForm((f) => ({
+      ...f,
+      name: f.name || prefill.name,
+      email: f.email || prefill.email,
+      phone: f.phone || prefill.phone,
+    }));
+  }, [prefill.name, prefill.email, prefill.phone]);
 
   const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
   const recs = recommendDestinations({ budget: form.budget, vibe: form.vibe });

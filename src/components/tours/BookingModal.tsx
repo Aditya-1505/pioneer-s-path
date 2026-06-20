@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Check } from "lucide-react";
@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { inr } from "@/routes/tours.index";
+import { usePrefill } from "@/hooks/use-prefill";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(100),
@@ -50,6 +51,15 @@ export function BookingModal({
   const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const prefill = usePrefill();
+  useEffect(() => {
+    setForm((f) => ({
+      ...f,
+      name: f.name || prefill.name,
+      email: f.email || prefill.email,
+      phone: f.phone || prefill.phone,
+    }));
+  }, [prefill.name, prefill.email, prefill.phone]);
 
   const submit = async () => {
     const parsed = schema.safeParse(form);

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2, Heart, Gift, Check, MessageCircle, Sparkles } from "lucide-react";
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND, BUDGETS, waLink } from "@/lib/brand";
 import { Reveal } from "@/components/Reveal";
+import { usePrefill } from "@/hooks/use-prefill";
 
 export const Route = createFileRoute("/surprise-planner")({
   head: () =>
@@ -32,6 +33,15 @@ function SurprisePlanner() {
   });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
+  const prefill = usePrefill();
+  useEffect(() => {
+    setForm((f) => ({
+      ...f,
+      name: f.name || prefill.name,
+      email: f.email || prefill.email,
+      phone: f.phone || prefill.phone,
+    }));
+  }, [prefill.name, prefill.email, prefill.phone]);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   const submit = async () => {
