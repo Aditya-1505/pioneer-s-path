@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Map, CalendarCheck, Inbox, Sparkles, Gift, Compass,
   Quote, Images, FileText, HelpCircle, UsersRound, Megaphone, Mail,
   LogOut, Mountain, Loader2, ShieldAlert, Activity, ExternalLink, Home,
-  TrendingUp, BellRing, CalendarDays, MapPinned, PackagePlus, Sun, Plug,
+  TrendingUp, BellRing, CalendarDays, MapPinned, PackagePlus, Sun, Plug, Users,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ import { SimpleCrud, type Option } from "@/components/admin/SimpleCrud";
 import { NotificationBell } from "@/components/admin/NotificationBell";
 import { ActivityCenter } from "@/components/admin/ActivityCenter";
 import { IntegrationsSettings } from "@/components/admin/IntegrationsSettings";
+import { UsersAdmin } from "@/components/admin/UsersAdmin";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -49,6 +50,7 @@ const SECTIONS: Section[] = [
   { id: "team", label: "Team", icon: UsersRound },
   { id: "announcements", label: "Announcements", icon: Megaphone },
   { id: "subscribers", label: "Subscribers", icon: Mail, unreadKey: "subscribers" },
+  { id: "users", label: "Users", icon: Users },
   { id: "integrations", label: "Integrations", icon: Plug },
 ];
 
@@ -255,6 +257,7 @@ function AdminPage() {
             />
           )}
           {active === "integrations" && <IntegrationsSettings />}
+          {active === "users" && <UsersAdmin />}
           {active === "bookings" && (
             <LeadsTable
               table="bookings"
