@@ -22,11 +22,15 @@ import {
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
 
+export type Option = { value: string; label: string };
+
 export type Field = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "checkbox" | "image";
+  type?: "text" | "textarea" | "number" | "checkbox" | "image" | "select" | "date";
   required?: boolean;
+  options?: Option[];
+  hint?: string;
 };
 
 type Row = Record<string, any>;
@@ -36,11 +40,15 @@ export function SimpleCrud({
   title,
   fields,
   columns,
+  extraOptions,
+  description,
 }: {
   table: string;
   title: string;
   fields: Field[];
   columns: { key: string; label: string }[];
+  extraOptions?: Record<string, Option[]>;
+  description?: string;
 }) {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
@@ -156,9 +164,12 @@ export function SimpleCrud({
   return (
     <div>
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-xl font-bold">
-          {title} <span className="text-sm font-normal text-muted-foreground">({visible.length})</span>
-        </h2>
+        <div>
+          <h2 className="font-display text-xl font-bold">
+            {title} <span className="text-sm font-normal text-muted-foreground">({visible.length})</span>
+          </h2>
+          {description && <p className="text-sm text-muted-foreground">{description}</p>}
+        </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -236,38 +247,59 @@ export function SimpleCrud({
             <DialogTitle>{editing ? "Edit" : "Add"} {title}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3">
-            {fields.map((f) => (
-              <div key={f.key}>
-                {f.type === "checkbox" ? (
-                  <label className="flex items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(form[f.key])}
-                      onChange={(e) => setForm({ ...form, [f.key]: e.target.checked })}
-                      className="h-4 w-4"
-                    />
-                    {f.label}
-                  </label>
-                ) : (
-                  <>
-                    <Label>{f.label}</Label>
-                    {f.type === "textarea" ? (
-                      <Textarea
-                        rows={4}
-                        value={form[f.key] ?? ""}
-                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+            {fields.map((f) => {
+              const opts = f.options ?? extraOptions?.[f.key];
+              return (
+                <div key={f.key}>
+                  {f.type === "checkbox" ? (
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(form[f.key])}
+                        onChange={(e) => setForm({ ...form, [f.key]: e.target.checked })}
+                        className="h-4 w-4"
                       />
-                    ) : (
-                      <Input
-                        type={f.type === "number" ? "number" : "text"}
-                        value={form[f.key] ?? ""}
-                        onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
-                      />
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
+                      {f.label}
+                    </label>
+                  ) : (
+                    <>
+                      <Label>
+                        {f.label}
+                        {f.required && <span className="text-destructive"> *</span>}
+                      </Label>
+                      {f.type === "textarea" ? (
+                        <Textarea
+                          rows={4}
+                          value={form[f.key] ?? ""}
+                          onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                        />
+                      ) : f.type === "select" ? (
+                        <select
+                          value={form[f.key] ?? ""}
+                          onChange={(e) => setForm({ ...form, [f.key]: e.target.value || null })}
+                          className="flex h-9 w-full rounded-md border bg-background px-3 py-1 text-sm"
+                        >
+                          <option value="">— None —</option>
+                          {(opts ?? []).map((o) => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Input
+                          type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                          value={form[f.key] ?? ""}
+                          onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                        />
+                      )}
+                      {f.type === "image" && form[f.key] ? (
+                        <img src={form[f.key]} alt="" className="mt-2 h-20 rounded object-cover" />
+                      ) : null}
+                      {f.hint && <p className="mt-1 text-xs text-muted-foreground">{f.hint}</p>}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>

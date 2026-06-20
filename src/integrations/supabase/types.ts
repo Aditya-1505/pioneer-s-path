@@ -81,10 +81,12 @@ export type Database = {
           departure_date: string | null
           email: string | null
           id: string
+          is_read: boolean
           message: string | null
           name: string
           notes: string | null
           phone: string | null
+          read_at: string | null
           status: string
           total_amount: number | null
           tour_id: string | null
@@ -98,10 +100,12 @@ export type Database = {
           departure_date?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           message?: string | null
           name: string
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           status?: string
           total_amount?: number | null
           tour_id?: string | null
@@ -115,10 +119,12 @@ export type Database = {
           departure_date?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           message?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           status?: string
           total_amount?: number | null
           tour_id?: string | null
@@ -143,9 +149,11 @@ export type Database = {
           destination_preference: string | null
           email: string | null
           id: string
+          is_read: boolean
           name: string
           notes: string | null
           phone: string | null
+          read_at: string | null
           requirements: string | null
           status: string
           travel_dates: string | null
@@ -157,9 +165,11 @@ export type Database = {
           destination_preference?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           name: string
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           requirements?: string | null
           status?: string
           travel_dates?: string | null
@@ -171,9 +181,11 @@ export type Database = {
           destination_preference?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           name?: string
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           requirements?: string | null
           status?: string
           travel_dates?: string | null
@@ -184,23 +196,40 @@ export type Database = {
       faq: {
         Row: {
           answer: string | null
+          category: string | null
           created_at: string
+          display_order: number
           id: string
           question: string
+          tour_id: string | null
         }
         Insert: {
           answer?: string | null
+          category?: string | null
           created_at?: string
+          display_order?: number
           id?: string
           question: string
+          tour_id?: string | null
         }
         Update: {
           answer?: string | null
+          category?: string | null
           created_at?: string
+          display_order?: number
           id?: string
           question?: string
+          tour_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "faq_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gallery: {
         Row: {
@@ -238,10 +267,12 @@ export type Database = {
           destination: string | null
           email: string | null
           id: string
+          is_read: boolean
           message: string | null
           name: string
           notes: string | null
           phone: string | null
+          read_at: string | null
           status: string
         }
         Insert: {
@@ -249,10 +280,12 @@ export type Database = {
           destination?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           message?: string | null
           name: string
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           status?: string
         }
         Update: {
@@ -260,20 +293,110 @@ export type Database = {
           destination?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           message?: string | null
           name?: string
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           status?: string
         }
         Relationships: []
+      }
+      integration_settings: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          key: string
+          label: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          key: string
+          label: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          key?: string
+          label?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      map_destinations: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_url: string | null
+          is_visible: boolean
+          latitude: number
+          longitude: number
+          name: string
+          region: string | null
+          tour_id: string | null
+          tour_slug: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          region?: string | null
+          tour_id?: string | null
+          tour_slug?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string | null
+          is_visible?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          region?: string | null
+          tour_id?: string | null
+          tour_slug?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "map_destinations_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscribers: {
         Row: {
           created_at: string
           email: string
           id: string
+          is_read: boolean
           name: string | null
+          read_at: string | null
           source: string | null
           status: string | null
         }
@@ -281,7 +404,9 @@ export type Database = {
           created_at?: string
           email: string
           id?: string
+          is_read?: boolean
           name?: string | null
+          read_at?: string | null
           source?: string | null
           status?: string | null
         }
@@ -289,9 +414,47 @@ export type Database = {
           created_at?: string
           email?: string
           id?: string
+          is_read?: boolean
           name?: string | null
+          read_at?: string | null
           source?: string | null
           status?: string | null
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string | null
+          read_at: string | null
+          related_record_id: string | null
+          related_table: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string | null
+          read_at?: string | null
+          related_record_id?: string | null
+          related_table?: string | null
+          title?: string
+          type?: string
         }
         Relationships: []
       }
@@ -319,6 +482,59 @@ export type Database = {
         }
         Relationships: []
       }
+      seasonal_collections: {
+        Row: {
+          banner_image: string | null
+          created_at: string
+          display_end: string | null
+          display_order: number
+          display_start: string | null
+          id: string
+          is_active: boolean
+          season: string | null
+          subtitle: string | null
+          title: string
+          tour_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          banner_image?: string | null
+          created_at?: string
+          display_end?: string | null
+          display_order?: number
+          display_start?: string | null
+          id?: string
+          is_active?: boolean
+          season?: string | null
+          subtitle?: string | null
+          title: string
+          tour_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          banner_image?: string | null
+          created_at?: string
+          display_end?: string | null
+          display_order?: number
+          display_start?: string | null
+          id?: string
+          is_active?: boolean
+          season?: string | null
+          subtitle?: string | null
+          title?: string
+          tour_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasonal_collections_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       surprise_trip_requests: {
         Row: {
           budget: string | null
@@ -326,10 +542,12 @@ export type Database = {
           destination: string | null
           email: string | null
           id: string
+          is_read: boolean
           name: string
           notes: string | null
           occasion: string | null
           phone: string | null
+          read_at: string | null
           requirements: string | null
           status: string
         }
@@ -339,10 +557,12 @@ export type Database = {
           destination?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           name: string
           notes?: string | null
           occasion?: string | null
           phone?: string | null
+          read_at?: string | null
           requirements?: string | null
           status?: string
         }
@@ -352,10 +572,12 @@ export type Database = {
           destination?: string | null
           email?: string | null
           id?: string
+          is_read?: boolean
           name?: string
           notes?: string | null
           occasion?: string | null
           phone?: string | null
+          read_at?: string | null
           requirements?: string | null
           status?: string
         }
@@ -421,8 +643,53 @@ export type Database = {
         }
         Relationships: []
       }
+      tour_addons: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          name: string
+          price: number
+          required: boolean
+          tour_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          name: string
+          price?: number
+          required?: boolean
+          tour_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          price?: number
+          required?: boolean
+          tour_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tour_addons_tour_id_fkey"
+            columns: ["tour_id"]
+            isOneToOne: false
+            referencedRelation: "tours"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tours: {
         Row: {
+          accommodation: string | null
           best_season: string | null
           created_at: string
           departure_dates: string[] | null
@@ -436,19 +703,26 @@ export type Database = {
           group_size: number | null
           group_type: string | null
           hero_image: string | null
+          highlights: string[] | null
           id: string
           inclusions: string[] | null
           itinerary: Json | null
+          network_info: string | null
+          packing_guide: string[] | null
           price: number | null
           seats_available: number | null
           short_description: string | null
           slug: string
           status: string
           title: string
+          transport: string | null
           updated_at: string
           vibe: string | null
+          video_urls: string[] | null
+          weather_info: string | null
         }
         Insert: {
+          accommodation?: string | null
           best_season?: string | null
           created_at?: string
           departure_dates?: string[] | null
@@ -462,19 +736,26 @@ export type Database = {
           group_size?: number | null
           group_type?: string | null
           hero_image?: string | null
+          highlights?: string[] | null
           id?: string
           inclusions?: string[] | null
           itinerary?: Json | null
+          network_info?: string | null
+          packing_guide?: string[] | null
           price?: number | null
           seats_available?: number | null
           short_description?: string | null
           slug: string
           status?: string
           title: string
+          transport?: string | null
           updated_at?: string
           vibe?: string | null
+          video_urls?: string[] | null
+          weather_info?: string | null
         }
         Update: {
+          accommodation?: string | null
           best_season?: string | null
           created_at?: string
           departure_dates?: string[] | null
@@ -488,17 +769,23 @@ export type Database = {
           group_size?: number | null
           group_type?: string | null
           hero_image?: string | null
+          highlights?: string[] | null
           id?: string
           inclusions?: string[] | null
           itinerary?: Json | null
+          network_info?: string | null
+          packing_guide?: string[] | null
           price?: number | null
           seats_available?: number | null
           short_description?: string | null
           slug?: string
           status?: string
           title?: string
+          transport?: string | null
           updated_at?: string
           vibe?: string | null
+          video_urls?: string[] | null
+          weather_info?: string | null
         }
         Relationships: []
       }
@@ -509,10 +796,12 @@ export type Database = {
           email: string | null
           group_type: string | null
           id: string
+          is_read: boolean
           month: string | null
           name: string | null
           notes: string | null
           phone: string | null
+          read_at: string | null
           recommendation: string | null
           status: string
           travelers: string | null
@@ -524,10 +813,12 @@ export type Database = {
           email?: string | null
           group_type?: string | null
           id?: string
+          is_read?: boolean
           month?: string | null
           name?: string | null
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           recommendation?: string | null
           status?: string
           travelers?: string | null
@@ -539,10 +830,12 @@ export type Database = {
           email?: string | null
           group_type?: string | null
           id?: string
+          is_read?: boolean
           month?: string | null
           name?: string | null
           notes?: string | null
           phone?: string | null
+          read_at?: string | null
           recommendation?: string | null
           status?: string
           travelers?: string | null

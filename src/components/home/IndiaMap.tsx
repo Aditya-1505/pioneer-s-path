@@ -5,27 +5,20 @@ import { MapPin, ArrowRight, ZoomIn, ZoomOut, RotateCcw, X, Sparkles, Users, Clo
 import { Reveal } from "@/components/Reveal";
 import { supabase } from "@/integrations/supabase/client";
 
-type Spot = {
-  key: string;
+type Destination = {
+  id: string;
   name: string;
-  emoji: string;
-  blurb: string;
-  // Position in normalized SVG coords (viewBox 0 0 100 120)
-  x: number;
-  y: number;
+  region: string | null;
+  latitude: number;
+  longitude: number;
+  image_url: string | null;
+  description: string | null;
+  tour_id: string | null;
+  tour_slug: string | null;
 };
 
-const SPOTS: Spot[] = [
-  { key: "kashmir", name: "Kashmir", emoji: "🏔️", blurb: "Dal Lake, Gulmarg & Pahalgam", x: 32, y: 14 },
-  { key: "ladakh",  name: "Ladakh",  emoji: "🛕", blurb: "Pangong, Nubra & Leh monasteries", x: 44, y: 18 },
-  { key: "spiti",   name: "Spiti",   emoji: "⛰️", blurb: "High-altitude desert road trip",   x: 40, y: 26 },
-  { key: "manali",  name: "Manali",  emoji: "🌲", blurb: "Solang, Sissu & Atal Tunnel",       x: 36, y: 30 },
-  { key: "meghalaya", name: "Meghalaya", emoji: "🌧️", blurb: "Living root bridges & Cherrapunji", x: 78, y: 44 },
-  { key: "goa",     name: "Goa",     emoji: "🏖️", blurb: "Beaches, cafes & sunset cruises",  x: 32, y: 75 },
-  { key: "kerala",  name: "Kerala",  emoji: "🌴", blurb: "Backwaters, Munnar & Alleppey",     x: 40, y: 96 },
-];
-
 type Tour = {
+  id: string;
   slug: string;
   title: string;
   destination: string | null;
@@ -34,27 +27,44 @@ type Tour = {
   seats_available: number | null;
 };
 
+// India bounding box for projecting lat/lng into the stylized 100x120 viewBox
+const LNG_MIN = 68, LNG_MAX = 97, LAT_MIN = 8, LAT_MAX = 37;
+const project = (lat: number, lng: number) => ({
+  x: ((lng - LNG_MIN) / (LNG_MAX - LNG_MIN)) * 100,
+  y: ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 120,
+});
+
 export function IndiaMap() {
   const navigate = useNavigate();
+  const [destinations, setDestinations] = useState<Destination[]>([]);
   const [tours, setTours] = useState<Tour[]>([]);
-  const [active, setActive] = useState<Spot | null>(null);
+  const [active, setActive] = useState<Destination | null>(null);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const dragRef = useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
 
   useEffect(() => {
     supabase
+      .from("map_destinations")
+      .select("id,name,region,latitude,longitude,image_url,description,tour_id,tour_slug")
+      .eq("is_visible", true)
+      .order("display_order", { ascending: true })
+      .then(({ data }) => setDestinations((data as Destination[]) ?? []));
+    supabase
       .from("tours")
-      .select("slug,title,destination,price,duration,seats_available")
+      .select("id,slug,title,destination,price,duration,seats_available")
       .eq("status", "published")
       .then(({ data }) => setTours((data as Tour[]) ?? []));
   }, []);
 
-  const tourFor = (spot: Spot) =>
-    tours.find((t) => (t.destination ?? "").toLowerCase().includes(spot.key));
+  const tourFor = (d: Destination) =>
+    tours.find((t) =>
+      (d.tour_id && t.id === d.tour_id) ||
+      (d.tour_slug && t.slug === d.tour_slug) ||
+      (t.destination ?? "").toLowerCase().includes(d.name.toLowerCase()),
+    );
 
   const onWheel = (e: React.WheelEvent) => {
-    e.preventDefault();
     setZoom((z) => Math.max(1, Math.min(3, z + (e.deltaY < 0 ? 0.15 : -0.15))));
   };
   const onMouseDown = (e: React.MouseEvent) => {
@@ -70,8 +80,8 @@ export function IndiaMap() {
   const endDrag = () => { dragRef.current = null; };
   const reset = () => { setZoom(1); setPan({ x: 0, y: 0 }); };
 
-  const handleView = (spot: Spot) => {
-    const t = tourFor(spot);
+  const handleView = (d: Destination) => {
+    const t = tourFor(d);
     if (t) navigate({ to: "/tours/$slug", params: { slug: t.slug } });
     else navigate({ to: "/tours" });
   };
@@ -114,7 +124,6 @@ export function IndiaMap() {
                       <stop offset="100%" stopColor="hsl(var(--secondary) / 0.18)" />
                     </linearGradient>
                   </defs>
-                  {/* Stylized India outline (simplified path) */}
                   <path
                     d="M40 6 L52 8 L58 14 L52 22 L60 26 L62 34 L72 36 L80 44 L74 50 L72 58 L66 64 L64 72 L58 78 L54 86 L52 96 L46 108 L42 116 L36 108 L34 96 L30 86 L26 76 L22 66 L24 56 L20 48 L24 38 L30 30 L28 22 L34 14 Z"
                     fill="url(#indFill)"
@@ -122,10 +131,11 @@ export function IndiaMap() {
                     strokeWidth="0.4"
                     strokeLinejoin="round"
                   />
-                  {SPOTS.map((s) => {
-                    const has = !!tourFor(s);
+                  {destinations.map((d) => {
+                    const { x, y } = project(d.latitude, d.longitude);
+                    const has = !!tourFor(d);
                     return (
-                      <g key={s.key} transform={`translate(${s.x} ${s.y})`}>
+                      <g key={d.id} transform={`translate(${x} ${y})`}>
                         <circle r="3" className={has ? "fill-primary/30" : "fill-secondary/30"}>
                           <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite" />
                           <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
@@ -133,10 +143,10 @@ export function IndiaMap() {
                         <circle
                           r="1.6"
                           className={`${has ? "fill-primary" : "fill-secondary"} cursor-pointer drop-shadow`}
-                          onClick={(e) => { e.stopPropagation(); setActive(s); }}
+                          onClick={(e) => { e.stopPropagation(); setActive(d); }}
                         />
                         <text x="2.5" y="0.8" className="fill-foreground text-[2.2px] font-semibold" pointerEvents="none">
-                          {s.name}
+                          {d.name}
                         </text>
                       </g>
                     );
@@ -144,7 +154,6 @@ export function IndiaMap() {
                 </svg>
               </div>
 
-              {/* Popup card */}
               <AnimatePresence>
                 {active && (
                   <motion.div
@@ -158,10 +167,14 @@ export function IndiaMap() {
                       return (
                         <>
                           <div className="flex items-start gap-3">
-                            <span className="text-3xl">{active.emoji}</span>
+                            {active.image_url ? (
+                              <img src={active.image_url} alt={active.name} className="size-12 rounded-lg object-cover" />
+                            ) : (
+                              <span className="text-3xl">📍</span>
+                            )}
                             <div className="flex-1">
                               <h3 className="font-display text-lg font-bold">{active.name}</h3>
-                              <p className="text-xs text-muted-foreground">{active.blurb}</p>
+                              <p className="text-xs text-muted-foreground">{active.description ?? active.region}</p>
                             </div>
                             <button onClick={() => setActive(null)} className="text-muted-foreground hover:text-foreground" aria-label="Close">
                               <X className="size-4" />
@@ -188,7 +201,7 @@ export function IndiaMap() {
                             onClick={() => handleView(active)}
                             className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow hover:bg-primary/90"
                           >
-                            View Trip <ArrowRight className="size-4" />
+                            {t ? "View Trip" : "Enquire Now"} <ArrowRight className="size-4" />
                           </button>
                         </>
                       );
@@ -202,19 +215,19 @@ export function IndiaMap() {
 
         <Reveal delay={0.1}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {SPOTS.map((s) => {
-              const has = !!tourFor(s);
+            {destinations.map((d) => {
+              const has = !!tourFor(d);
               return (
                 <motion.button
-                  key={s.key}
+                  key={d.id}
                   whileHover={{ y: -3 }}
-                  onClick={() => setActive(s)}
+                  onClick={() => setActive(d)}
                   className={`flex items-center justify-between rounded-2xl border p-4 text-left transition ${
-                    active?.key === s.key ? "border-primary bg-primary/5" : "bg-card"
+                    active?.id === d.id ? "border-primary bg-primary/5" : "bg-card"
                   }`}
                 >
                   <span>
-                    <span className="font-display text-lg font-semibold">{s.emoji} {s.name}</span>
+                    <span className="font-display text-lg font-semibold">{d.name}</span>
                     <span className="block text-xs text-muted-foreground">{has ? "Packages available" : "Enquire now"}</span>
                   </span>
                   <ArrowRight className="size-4 text-primary" />

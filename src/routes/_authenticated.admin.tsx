@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Map, CalendarCheck, Inbox, Sparkles, Gift, Compass,
   Quote, Images, FileText, HelpCircle, UsersRound, Megaphone, Mail,
   LogOut, Mountain, Loader2, ShieldAlert, Activity, ExternalLink, Home,
-  TrendingUp, BellRing, CalendarDays,
+  TrendingUp, BellRing, CalendarDays, MapPinned, PackagePlus, Sun, Plug,
 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -14,9 +14,10 @@ import { useUnreadCounts } from "@/hooks/use-notifications";
 import { Button } from "@/components/ui/button";
 import { ToursAdmin } from "@/components/admin/ToursAdmin";
 import { LeadsTable } from "@/components/admin/LeadsTable";
-import { SimpleCrud } from "@/components/admin/SimpleCrud";
+import { SimpleCrud, type Option } from "@/components/admin/SimpleCrud";
 import { NotificationBell } from "@/components/admin/NotificationBell";
 import { ActivityCenter } from "@/components/admin/ActivityCenter";
+import { IntegrationsSettings } from "@/components/admin/IntegrationsSettings";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   component: AdminPage,
@@ -33,6 +34,9 @@ const SECTIONS: Section[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "activity", label: "Activity Center", icon: Activity },
   { id: "tours", label: "Tours", icon: Map },
+  { id: "addons", label: "Tour Add-ons", icon: PackagePlus },
+  { id: "map", label: "Map Pins", icon: MapPinned },
+  { id: "seasonal", label: "Seasonal Tours", icon: Sun },
   { id: "bookings", label: "Bookings", icon: CalendarCheck, unreadKey: "bookings" },
   { id: "inquiries", label: "Inquiries", icon: Inbox, unreadKey: "inquiries" },
   { id: "custom", label: "Custom Trips", icon: Sparkles, unreadKey: "custom" },
@@ -45,6 +49,7 @@ const SECTIONS: Section[] = [
   { id: "team", label: "Team", icon: UsersRound },
   { id: "announcements", label: "Announcements", icon: Megaphone },
   { id: "subscribers", label: "Subscribers", icon: Mail, unreadKey: "subscribers" },
+  { id: "integrations", label: "Integrations", icon: Plug },
 ];
 
 
@@ -53,7 +58,19 @@ function AdminPage() {
   const queryClient = useQueryClient();
   const { user, isStaff, loading } = useAuth();
   const [active, setActive] = useState<string>("dashboard");
+  const [tourOptions, setTourOptions] = useState<Option[]>([]);
   const unread = useUnreadCounts(isStaff);
+
+  useEffect(() => {
+    if (!isStaff) return;
+    supabase
+      .from("tours")
+      .select("id,title")
+      .order("title", { ascending: true })
+      .then(({ data }) =>
+        setTourOptions(((data as { id: string; title: string }[]) ?? []).map((t) => ({ value: t.id, label: t.title }))),
+      );
+  }, [isStaff]);
 
   const signOut = async () => {
     await queryClient.cancelQueries();
@@ -177,6 +194,67 @@ function AdminPage() {
           {active === "dashboard" && <Dashboard onJump={setActive} unread={unread} />}
           {active === "activity" && <ActivityCenter />}
           {active === "tours" && <ToursAdmin />}
+          {active === "addons" && (
+            <SimpleCrud table="tour_addons" title="Tour Add-ons"
+              description="Custom paid extras per tour (e.g. Paragliding, Rafting). Travellers select these in the booking calculator."
+              extraOptions={{ tour_id: tourOptions }}
+              columns={[
+                { key: "name", label: "Add-on" }, { key: "price", label: "Price" },
+                { key: "required", label: "Required" }, { key: "display_order", label: "Order" },
+              ]}
+              fields={[
+                { key: "tour_id", label: "Tour", type: "select", required: true, hint: "Which tour this add-on belongs to." },
+                { key: "name", label: "Name", required: true, hint: "e.g. Paragliding, River Rafting" },
+                { key: "description", label: "Description", type: "textarea" },
+                { key: "price", label: "Price (₹)", type: "number", required: true },
+                { key: "required", label: "Required (always included)", type: "checkbox" },
+                { key: "display_order", label: "Display order", type: "number" },
+              ]}
+            />
+          )}
+          {active === "map" && (
+            <SimpleCrud table="map_destinations" title="Map Pins"
+              description="Pins on the homepage interactive India map. Link a tour to make the pin clickable to that package; toggle visibility to match availability."
+              extraOptions={{ tour_id: tourOptions }}
+              columns={[
+                { key: "name", label: "Name" }, { key: "region", label: "Region" },
+                { key: "is_visible", label: "Visible" }, { key: "display_order", label: "Order" },
+              ]}
+              fields={[
+                { key: "name", label: "Name", required: true, hint: "e.g. Manali, Spiti, Goa" },
+                { key: "region", label: "Region / Subtitle" },
+                { key: "latitude", label: "Latitude", type: "number", required: true, hint: "India range ~8 to 37 (e.g. Manali 32.24)" },
+                { key: "longitude", label: "Longitude", type: "number", required: true, hint: "India range ~68 to 97 (e.g. Manali 77.19)" },
+                { key: "image_url", label: "Image URL", type: "image" },
+                { key: "description", label: "Description", type: "textarea" },
+                { key: "tour_id", label: "Linked Tour", type: "select", hint: "Optional — clicking the pin opens this tour." },
+                { key: "is_visible", label: "Visible on map", type: "checkbox" },
+                { key: "display_order", label: "Display order", type: "number" },
+              ]}
+            />
+          )}
+          {active === "seasonal" && (
+            <SimpleCrud table="seasonal_collections" title="Seasonal Tours"
+              description="Featured seasonal destinations shown on the homepage during their display period."
+              extraOptions={{ tour_id: tourOptions }}
+              columns={[
+                { key: "title", label: "Title" }, { key: "season", label: "Season" },
+                { key: "is_active", label: "Active" }, { key: "display_order", label: "Order" },
+              ]}
+              fields={[
+                { key: "title", label: "Title", required: true, hint: "e.g. Winter in Kashmir" },
+                { key: "season", label: "Season", hint: "e.g. Winter, Summer, Monsoon" },
+                { key: "subtitle", label: "Subtitle", type: "textarea" },
+                { key: "banner_image", label: "Banner Image URL", type: "image" },
+                { key: "display_start", label: "Display from", type: "date" },
+                { key: "display_end", label: "Display until", type: "date" },
+                { key: "tour_id", label: "Featured Tour", type: "select" },
+                { key: "is_active", label: "Active", type: "checkbox" },
+                { key: "display_order", label: "Display order", type: "number" },
+              ]}
+            />
+          )}
+          {active === "integrations" && <IntegrationsSettings />}
           {active === "bookings" && (
             <LeadsTable
               table="bookings"
@@ -291,10 +369,18 @@ function AdminPage() {
           )}
           {active === "faq" && (
             <SimpleCrud table="faq" title="FAQ"
-              columns={[{ key: "question", label: "Question" }, { key: "answer", label: "Answer" }]}
+              description="General FAQs appear on the FAQ page & homepage. Link a tour to show a question only on that tour's detail page."
+              extraOptions={{ tour_id: tourOptions }}
+              columns={[
+                { key: "question", label: "Question" }, { key: "category", label: "Category" },
+                { key: "display_order", label: "Order" },
+              ]}
               fields={[
                 { key: "question", label: "Question", required: true },
-                { key: "answer", label: "Answer", type: "textarea" },
+                { key: "answer", label: "Answer", type: "textarea", required: true },
+                { key: "category", label: "Category", hint: "e.g. Booking, Safety, Payments" },
+                { key: "tour_id", label: "Trip-specific (optional)", type: "select", hint: "Leave empty for a general FAQ." },
+                { key: "display_order", label: "Display order", type: "number" },
               ]}
             />
           )}
@@ -370,10 +456,11 @@ function Dashboard({ onJump, unread }: { onJump: (s: string) => void; unread: Re
   }, [unread]);
 
   const summaryCards = [
-    { label: "Total Requests", value: summary.total, icon: Inbox, color: "text-blue-500", bg: "bg-blue-500/10" },
-    { label: "Unread Requests", value: summary.unread, icon: BellRing, color: "text-red-500", bg: "bg-red-500/10" },
-    { label: "New Today", value: summary.today, icon: CalendarDays, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Converted Leads", value: summary.converted, icon: TrendingUp, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "New Leads Today", value: summary.today, section: "activity", icon: CalendarDays, color: "text-emerald-500", bg: "bg-emerald-500/10" },
+    { label: "Total Leads", value: summary.total, section: "activity", icon: Inbox, color: "text-blue-500", bg: "bg-blue-500/10" },
+    { label: "Active Trips", value: counts["tours"] ?? 0, section: "tours", icon: Map, color: "text-amber-500", bg: "bg-amber-500/10" },
+    { label: "Converted Bookings", value: summary.converted, section: "bookings", icon: TrendingUp, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Unread Notifications", value: summary.unread, section: "activity", icon: BellRing, color: "text-red-500", bg: "bg-red-500/10" },
   ];
 
   const cards = [
@@ -391,9 +478,13 @@ function Dashboard({ onJump, unread }: { onJump: (s: string) => void; unread: Re
       <h1 className="font-display text-2xl font-bold">Dashboard</h1>
       <p className="mt-1 text-sm text-muted-foreground">Live overview of your travel business.</p>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {summaryCards.map((c) => (
-          <div key={c.label} className="rounded-2xl border bg-card p-5 shadow-sm">
+          <button
+            key={c.label}
+            onClick={() => onJump(c.section)}
+            className="rounded-2xl border bg-card p-5 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+          >
             <div className="flex items-center justify-between">
               <span className={`grid size-10 place-items-center rounded-xl ${c.bg} ${c.color}`}>
                 <c.icon className="size-5" />
@@ -401,7 +492,7 @@ function Dashboard({ onJump, unread }: { onJump: (s: string) => void; unread: Re
             </div>
             <p className="mt-4 font-display text-3xl font-bold">{c.value}</p>
             <p className="text-sm text-muted-foreground">{c.label}</p>
-          </div>
+          </button>
         ))}
       </div>
 
