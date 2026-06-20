@@ -33,7 +33,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/admin" });
+      if (data.user) navigate({ to: "/" });
     });
   }, [navigate]);
 
@@ -48,12 +48,12 @@ function AuthPage() {
       const { error } = await supabase.auth.signUp({
         email: e.data,
         password: p.data,
-        options: { data: { name }, emailRedirectTo: window.location.origin + "/admin" },
+        options: { data: { name }, emailRedirectTo: window.location.origin + "/" },
       });
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Account created! You're signed in.");
-      navigate({ to: "/admin" });
+      navigate({ to: "/" });
     } else {
       const { error } = await supabase.auth.signInWithPassword({
         email: e.data,
@@ -62,17 +62,17 @@ function AuthPage() {
       setLoading(false);
       if (error) return toast.error(error.message);
       toast.success("Welcome back!");
-      navigate({ to: "/admin" });
+      navigate({ to: "/" });
     }
   };
 
   const google = async () => {
     const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/admin",
+      redirect_uri: window.location.origin + "/",
     });
     if (result.error) return toast.error("Google sign-in failed. Please try again.");
     if (result.redirected) return;
-    navigate({ to: "/admin" });
+    navigate({ to: "/" });
   };
 
   return (

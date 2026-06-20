@@ -120,14 +120,14 @@ export function IndiaMap() {
                 <svg viewBox="0 0 100 120" className="size-full" preserveAspectRatio="xMidYMid meet">
                   <defs>
                     <linearGradient id="indFill" x1="0" x2="1" y1="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary) / 0.25)" />
-                      <stop offset="100%" stopColor="hsl(var(--secondary) / 0.18)" />
+                      <stop offset="0%" stopColor="color-mix(in oklab, var(--primary) 30%, transparent)" />
+                      <stop offset="100%" stopColor="color-mix(in oklab, var(--secondary) 22%, transparent)" />
                     </linearGradient>
                   </defs>
                   <path
                     d="M40 6 L52 8 L58 14 L52 22 L60 26 L62 34 L72 36 L80 44 L74 50 L72 58 L66 64 L64 72 L58 78 L54 86 L52 96 L46 108 L42 116 L36 108 L34 96 L30 86 L26 76 L22 66 L24 56 L20 48 L24 38 L30 30 L28 22 L34 14 Z"
                     fill="url(#indFill)"
-                    stroke="hsl(var(--primary) / 0.5)"
+                    stroke="color-mix(in oklab, var(--primary) 55%, transparent)"
                     strokeWidth="0.4"
                     strokeLinejoin="round"
                   />

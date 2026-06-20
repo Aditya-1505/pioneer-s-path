@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { Loader2, Phone, Mail, MapPin, MessageCircle, Send } from "lucide-react";
@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { BRAND, waLink } from "@/lib/brand";
+import { usePrefill } from "@/hooks/use-prefill";
 
 export const Route = createFileRoute("/contact")({
   head: () => pageHead("Contact", "Get in touch with The Pioneer Tours by phone, WhatsApp or email."),
@@ -17,9 +18,19 @@ export const Route = createFileRoute("/contact")({
 });
 
 function ContactPage() {
+  const prefill = usePrefill();
   const [form, setForm] = useState({ name: "", email: "", phone: "", destination: "", message: "" });
   const [loading, setLoading] = useState(false);
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    setForm((f) => ({
+      ...f,
+      name: f.name || prefill.name,
+      email: f.email || prefill.email,
+      phone: f.phone || prefill.phone,
+    }));
+  }, [prefill.name, prefill.email, prefill.phone]);
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
