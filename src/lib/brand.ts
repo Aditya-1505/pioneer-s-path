@@ -17,6 +17,7 @@ export const NAV_LINKS = [
   { label: "Surprise Trips", to: "/surprise-planner" },
   { label: "Gallery", to: "/gallery" },
   { label: "Blog", to: "/blog" },
+  { label: "FAQ", to: "/faq" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ] as const;

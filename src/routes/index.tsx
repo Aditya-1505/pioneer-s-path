@@ -9,6 +9,8 @@ import { Testimonials } from "@/components/home/Testimonials";
 import { IndiaMap } from "@/components/home/IndiaMap";
 import { SafetyTrust } from "@/components/home/SafetyTrust";
 import { FloatingPhotos } from "@/components/home/FloatingPhotos";
+import { SeasonalTours } from "@/components/home/SeasonalTours";
+import { FAQPreview } from "@/components/home/FAQPreview";
 import { DESTINATIONS } from "@/lib/destinations";
 import { BRAND, MONTHS, waLink } from "@/lib/brand";
 import { supabase } from "@/integrations/supabase/client";
@@ -175,7 +177,10 @@ function Home() {
         </div>
       </section>
 
-      {/* SEASONAL */}
+      {/* SEASONAL (DB-driven; falls back silently when empty) */}
+      <SeasonalTours />
+
+      {/* SEASONAL FALLBACK (static) */}
       <section className="mx-auto max-w-7xl px-4 py-20">
         <Reveal className="mb-10 text-center">
           <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Perfect for {currentMonth}</span>
@@ -237,6 +242,9 @@ function Home() {
 
       {/* WALL OF LOVE — testimonials + video reviews */}
       <Testimonials />
+
+      {/* FAQ PREVIEW */}
+      <FAQPreview />
     </main>
   );
 }
