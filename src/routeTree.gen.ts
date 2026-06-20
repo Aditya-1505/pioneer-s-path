@@ -13,6 +13,7 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SurprisePlannerRouteImport } from './routes/surprise-planner'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as CustomPlannerRouteImport } from './routes/custom-planner'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CancellationRouteImport } from './routes/cancellation'
@@ -44,6 +45,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const GalleryRoute = GalleryRouteImport.update({
   id: '/gallery',
   path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CustomPlannerRoute = CustomPlannerRouteImport.update({
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
   '/custom-planner': typeof CustomPlannerRoute
+  '/faq': typeof FaqRoute
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/surprise-planner': typeof SurprisePlannerRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
   '/custom-planner': typeof CustomPlannerRoute
+  '/faq': typeof FaqRoute
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/surprise-planner': typeof SurprisePlannerRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/cancellation': typeof CancellationRoute
   '/contact': typeof ContactRoute
   '/custom-planner': typeof CustomPlannerRoute
+  '/faq': typeof FaqRoute
   '/gallery': typeof GalleryRoute
   '/privacy': typeof PrivacyRoute
   '/surprise-planner': typeof SurprisePlannerRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/cancellation'
     | '/contact'
     | '/custom-planner'
+    | '/faq'
     | '/gallery'
     | '/privacy'
     | '/surprise-planner'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/cancellation'
     | '/contact'
     | '/custom-planner'
+    | '/faq'
     | '/gallery'
     | '/privacy'
     | '/surprise-planner'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/cancellation'
     | '/contact'
     | '/custom-planner'
+    | '/faq'
     | '/gallery'
     | '/privacy'
     | '/surprise-planner'
@@ -223,6 +235,7 @@ export interface RootRouteChildren {
   CancellationRoute: typeof CancellationRoute
   ContactRoute: typeof ContactRoute
   CustomPlannerRoute: typeof CustomPlannerRoute
+  FaqRoute: typeof FaqRoute
   GalleryRoute: typeof GalleryRoute
   PrivacyRoute: typeof PrivacyRoute
   SurprisePlannerRoute: typeof SurprisePlannerRoute
@@ -259,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/gallery'
       fullPath: '/gallery'
       preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/custom-planner': {
@@ -378,6 +398,7 @@ const rootRouteChildren: RootRouteChildren = {
   CancellationRoute: CancellationRoute,
   ContactRoute: ContactRoute,
   CustomPlannerRoute: CustomPlannerRoute,
+  FaqRoute: FaqRoute,
   GalleryRoute: GalleryRoute,
   PrivacyRoute: PrivacyRoute,
   SurprisePlannerRoute: SurprisePlannerRoute,

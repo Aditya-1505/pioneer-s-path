@@ -67,6 +67,7 @@ export function Footer() {
             <li className="flex gap-2"><MapPin className="size-4 shrink-0" /><span>{BRAND.address}</span></li>
           </ul>
           <div className="mt-4 flex flex-wrap gap-3 text-xs text-primary-foreground/70">
+            <Link to="/faq" className="hover:underline">FAQs</Link>
             <Link to="/terms" className="hover:underline">Terms</Link>
             <Link to="/privacy" className="hover:underline">Privacy</Link>
             <Link to="/cancellation" className="hover:underline">Cancellation</Link>
