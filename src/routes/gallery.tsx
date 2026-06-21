@@ -17,29 +17,31 @@ type Item = {
   image_url: string | null;
   video_url: string | null;
   category: string | null;
+  location_tag: string | null;
 };
 
 function GalleryPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const [cat, setCat] = useState("All");
+  const [tag, setTag] = useState("All");
 
   useEffect(() => {
-    supabase
-      .from("gallery")
-      .select("id,title,destination,image_url,video_url,category")
+    (supabase.from("gallery") as any)
+      .select("id,title,destination,image_url,video_url,category,location_tag")
       .order("created_at", { ascending: false })
-      .then(({ data }) => {
+      .then(({ data }: { data: unknown }) => {
         setItems((data as Item[]) ?? []);
         setLoading(false);
       });
   }, []);
 
-  const cats = useMemo(
-    () => ["All", ...Array.from(new Set(items.map((i) => i.category || i.destination).filter(Boolean) as string[]))],
+  const tags = useMemo(
+    () => ["All", ...Array.from(new Set(items.map((i) => i.location_tag || i.destination || i.category).filter(Boolean) as string[]))],
     [items],
   );
-  const filtered = items.filter((i) => cat === "All" || i.category === cat || i.destination === cat);
+  const filtered = items.filter(
+    (i) => tag === "All" || i.location_tag === tag || i.destination === tag || i.category === tag,
+  );
 
   return (
     <main>
