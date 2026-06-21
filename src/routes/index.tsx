@@ -13,7 +13,7 @@ import { ConversionPlanners } from "@/components/home/ConversionPlanners";
 import { JourneyExplorer } from "@/components/home/JourneyExplorer";
 import { FAQPreview } from "@/components/home/FAQPreview";
 import { DESTINATIONS } from "@/lib/destinations";
-import { BRAND, MONTHS, waLink } from "@/lib/brand";
+import { BRAND, waLink } from "@/lib/brand";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
