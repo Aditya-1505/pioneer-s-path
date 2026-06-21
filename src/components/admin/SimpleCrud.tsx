@@ -285,6 +285,12 @@ export function SimpleCrud({
                             <option key={o.value} value={o.value}>{o.label}</option>
                           ))}
                         </select>
+                      ) : f.type === "image" && f.bucket ? (
+                        <ImageUploader
+                          bucket={f.bucket}
+                          value={form[f.key] ?? null}
+                          onChange={(url) => setForm({ ...form, [f.key]: url })}
+                        />
                       ) : (
                         <Input
                           type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
@@ -292,9 +298,10 @@ export function SimpleCrud({
                           onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                         />
                       )}
-                      {f.type === "image" && form[f.key] ? (
+                      {f.type === "image" && !f.bucket && form[f.key] ? (
                         <img src={form[f.key]} alt="" className="mt-2 h-20 rounded object-cover" />
                       ) : null}
+                      {f.hint && <p className="mt-1 text-xs text-muted-foreground">{f.hint}</p>}
                       {f.hint && <p className="mt-1 text-xs text-muted-foreground">{f.hint}</p>}
                     </>
                   )}
