@@ -290,7 +290,7 @@ export function SimpleCrud({
                         <ImageUploader
                           bucket={f.bucket}
                           value={form[f.key] ?? null}
-                          onChange={(url) => setForm({ ...form, [f.key]: url })}
+                          onChange={(url: string | null) => setForm({ ...form, [f.key]: url })}
                         />
                       ) : (
                         <Input
