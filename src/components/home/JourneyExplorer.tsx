@@ -34,13 +34,12 @@ export function JourneyExplorer() {
   const [active, setActive] = useState<Tab>("featured");
 
   useEffect(() => {
-    supabase
-      .from("tours")
+    (supabase.from("tours") as any)
       .select("id,title,slug,destination,duration,price,hero_image,featured,best_season,best_months_label,created_at")
       .eq("status", "published")
       .order("created_at", { ascending: false })
       .limit(40)
-      .then(({ data }) => setTours((data as Tour[]) ?? []));
+      .then(({ data }: { data: unknown }) => setTours((data as Tour[]) ?? []));
   }, []);
 
   const currentMonth = MONTHS[new Date().getMonth()];
