@@ -102,10 +102,22 @@ function TourDetails() {
         ]);
         if (!active) return;
         const a = (ad as Addon[]) ?? [];
-        setAddonsAvailable(a.length ? a : FALLBACK_ADDONS);
-        setSelectedAddonIds(a.filter((x) => x.required).map((x) => x.id));
-        setFaqs(((fq as Faq[]) ?? []));
-        if (fq && fq.length > 0) setOpenFaq((fq[0] as Faq).id);
+        // Prefer admin-defined trip-specific smart_addons (jsonb on the tour); fall back to the legacy tour_addons table, then static defaults
+        const sm = (t.smart_addons ?? []).map((x, i) => ({
+          id: `smart_${i}_${x.name}`,
+          name: x.name,
+          description: x.description ?? null,
+          price: Number(x.price) || 0,
+          required: false,
+        }));
+        const finalAddons = sm.length ? sm : a.length ? a : FALLBACK_ADDONS;
+        setAddonsAvailable(finalAddons);
+        setSelectedAddonIds(finalAddons.filter((x) => x.required).map((x) => x.id));
+        // Prefer trip-specific FAQs stored on the tour; fall back to the legacy faq table
+        const tripFaqs = (t.trip_faqs ?? []).map((f, i) => ({ id: `trip_${i}`, question: f.question, answer: f.answer }));
+        const finalFaqs = tripFaqs.length ? tripFaqs : ((fq as Faq[]) ?? []);
+        setFaqs(finalFaqs);
+        if (finalFaqs.length > 0) setOpenFaq(finalFaqs[0].id);
         setRelated((rel as RelatedTour[]) ?? []);
       }
       setLoading(false);
