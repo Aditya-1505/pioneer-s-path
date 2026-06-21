@@ -44,6 +44,21 @@ const empty: Form = {
   requirements: "",
 };
 
+// Validation functions
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePhone = (phone: string): boolean => {
+  const phoneRegex = /^\d{10}$/;
+  return phoneRegex.test(phone.replace(/\D/g, ''));
+};
+
+const validateName = (name: string): boolean => {
+  return name.trim().length > 0;
+};
+
 function CustomPlanner() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Form>(empty);
@@ -73,6 +88,8 @@ function CustomPlanner() {
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
     if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
+    if (!validatePhone(form.phone)) return toast.error("Phone number must be 10 digits");
+    if (form.email && !validateEmail(form.email)) return toast.error("Please enter a valid email address");
     setLoading(true);
     const { error } = await supabase.from("custom_trip_requests").insert({
       name: form.name,

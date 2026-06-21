@@ -81,6 +81,7 @@ function TourDetails() {
   const [bookingOpen, setBookingOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [propertyImageIndex, setPropertyImageIndex] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -192,26 +193,59 @@ function TourDetails() {
             ))}
           </div>
 
-          <Reveal>
-            <h2 className="mt-10 font-display text-2xl font-bold">Overview</h2>
-            <p className="mt-3 leading-relaxed text-muted-foreground">{tour.description}</p>
-          </Reveal>
+           <Reveal>
+             <h2 className="mt-10 font-display text-2xl font-bold">Overview</h2>
+             <p className="mt-3 leading-relaxed text-muted-foreground">{tour.description}</p>
+           </Reveal>
 
-          {/* Accommodation Showcase */}
-          {tour.property_images && tour.property_images.length > 0 && (
-            <div className="mt-10">
-              <h2 className="font-display text-2xl font-bold">Where You'll Stay</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Verified properties — handpicked for comfort, location and reviews.</p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {tour.property_images.map((img, i) => (
-                  <div key={i} className="group relative overflow-hidden rounded-2xl border bg-card">
-                    <img src={img} alt={`Accommodation ${i + 1}`} loading="lazy"
-                      className="h-48 w-full object-cover transition duration-500 group-hover:scale-105" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+           {/* Connect CTA after overview */}
+           <ConnectCTA
+             title="Questions about this tour?"
+             subtitle="Chat with a trip expert in minutes — customise pace, stops or dates."
+             message={`Hi ${BRAND.name}! I have questions about the ${tour.title} tour.`}
+           />
+
+           {/* Accommodation Showcase */}
+           {tour.property_images && tour.property_images.length > 0 && (
+             <div className="mt-10">
+               <h2 className="font-display text-2xl font-bold">Where You'll Stay</h2>
+               <p className="mt-1 text-sm text-muted-foreground">Verified properties — handpicked for comfort, location and reviews.</p>
+               <div className="mt-5">
+                 {tour.property_images.length === 1 ? (
+                   <div className="overflow-hidden rounded-2xl border bg-card">
+                     <img src={tour.property_images[0]} alt="Accommodation" loading="lazy"
+                       className="h-96 w-full object-cover" />
+                   </div>
+                 ) : (
+                   <div className="relative overflow-hidden rounded-2xl border bg-card">
+                     <div className="relative h-96">
+                       <img src={tour.property_images[propertyImageIndex]} alt={`Accommodation ${propertyImageIndex + 1}`} loading="lazy"
+                         className="h-full w-full object-cover transition-opacity duration-300" />
+                     </div>
+                     <div className="flex items-center justify-between p-4">
+                       <button
+                         onClick={() => setPropertyImageIndex((i) => (i - 1 + tour.property_images!.length) % tour.property_images!.length)}
+                         className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary/90"
+                         aria-label="Previous image"
+                       >
+                         <ArrowLeft className="size-5" />
+                       </button>
+                       <span className="text-sm font-medium text-muted-foreground">
+                         {propertyImageIndex + 1} / {tour.property_images.length}
+                       </span>
+                       <button
+                         onClick={() => setPropertyImageIndex((i) => (i + 1) % tour.property_images!.length)}
+                         className="grid size-10 place-items-center rounded-full bg-primary text-primary-foreground transition hover:bg-primary/90"
+                         aria-label="Next image"
+                       >
+                         <ArrowRight className="size-5" />
+                       </button>
+                     </div>
+                   </div>
+                 )}
+               </div>
+             </div>
+           )}
 
           {/* When to Go */}
           {(tour.best_months_label || tour.best_months_description) && (
@@ -254,16 +288,10 @@ function TourDetails() {
                       <p className="mt-3 text-sm text-muted-foreground">{d.details}</p>
                     </div>
                   </motion.li>
-                ))}
-              </ol>
-              {/* Connect CTA after itinerary */}
-              <ConnectCTA
-                title="Questions about this itinerary?"
-                subtitle="Chat with a trip expert in minutes — customise pace, stops or dates."
-                message={`Hi ${BRAND.name}! I have a few questions about the ${tour.title} itinerary.`}
-              />
-            </div>
-          )}
+               ))}
+               </ol>
+             </div>
+           )}
 
           {/* Destination Deep-Dive */}
           {tour.destination_highlights && tour.destination_highlights.length > 0 && (

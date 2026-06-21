@@ -176,7 +176,7 @@ function Home() {
       <JourneyExplorer />
 
       {/* INSPIRATION WALL */}
-      <section className="overflow-hidden bg-secondary/5 py-16">
+      {/* <section className="overflow-hidden bg-secondary/5 py-16">
         <Reveal className="mb-8 px-4 text-center">
           <h2 className="font-display text-3xl font-bold sm:text-4xl">Travel Inspiration Wall</h2>
           <p className="mt-2 text-muted-foreground">Hover to pause the wander.</p>
@@ -190,16 +190,17 @@ function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* INTERACTIVE INDIA MAP */}
-      <IndiaMap />
-
-      {/* SAFETY & TRUST */}
-      <SafetyTrust />
+      {/* <IndiaMap /> */}
 
       {/* FLOATING PHOTOS + QUOTE CAROUSEL */}
       <FloatingPhotos />
+
+
+      {/* SAFETY & TRUST */}
+      <SafetyTrust />
 
       {/* FAQ PREVIEW */}
       <FAQPreview />

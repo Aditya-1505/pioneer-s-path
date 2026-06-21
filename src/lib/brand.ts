@@ -15,7 +15,7 @@ export type NavItem = { label: string; to?: string; children?: { label: string; 
 export const NAV_LINKS: NavItem[] = [
   { label: "Home", to: "/" },
   { label: "Tours", to: "/tours" },
-  { label: "Plan My Trip", to: "/custom-planner" },
+//  { label: "Plan My Trip", to: "/custom-planner" },
   { label: "Surprise Trips", to: "/surprise-planner" },
   {
     label: "Travel Diaries",
@@ -24,7 +24,7 @@ export const NAV_LINKS: NavItem[] = [
       { label: "Blog", to: "/blog" },
     ],
   },
-  { label: "FAQ", to: "/faq" },
+  // { label: "FAQ", to: "/faq" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
 ];
