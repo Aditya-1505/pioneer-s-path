@@ -178,12 +178,12 @@ function SurprisePlanner() {
                 <Input id="name" className="mt-1.5" value={form.name} onChange={(e) => set("name", e.target.value)} />
               </div>
               <div>
-                <Label htmlFor="phone">Phone / WhatsApp</Label>
-                <Input id="phone" className="mt-1.5" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                <Label htmlFor="phone">Phone / WhatsApp *</Label>
+                <Input id="phone" className="mt-1.5" required value={form.phone} onChange={(e) => set("phone", e.target.value)} />
               </div>
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
               <Input id="email" type="email" className="mt-1.5" value={form.email} onChange={(e) => set("email", e.target.value)} />
             </div>
             <div>
