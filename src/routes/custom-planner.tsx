@@ -275,6 +275,13 @@ function CustomPlanner() {
           </div>
         </div>
       </div>
+      <div className="mx-auto max-w-3xl px-4 pb-16">
+        <ConnectCTA
+          title="Prefer to chat instead?"
+          subtitle="Skip the form — speak to a trip designer right now."
+          message={`Hi ${BRAND.name}! I'd like help planning a custom trip.`}
+        />
+      </div>
     </main>
   );
 }
