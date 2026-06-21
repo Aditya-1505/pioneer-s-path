@@ -52,12 +52,12 @@ function GalleryPage() {
       />
       <div className="mx-auto max-w-7xl px-4 py-12">
         <div className="mb-8 flex flex-wrap justify-center gap-2">
-          {cats.map((c) => (
+          {tags.map((c) => (
             <button
               key={c}
-              onClick={() => setCat(c)}
+              onClick={() => setTag(c)}
               className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
-                cat === c ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-accent"
+                tag === c ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-accent"
               }`}
             >
               {c}
