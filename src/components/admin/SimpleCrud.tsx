@@ -21,6 +21,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { supabase } from "@/integrations/supabase/client";
+import { ImageUploader } from "@/components/admin/ImageUploader";
 
 export type Option = { value: string; label: string };
 
