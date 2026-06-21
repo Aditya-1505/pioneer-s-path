@@ -20,7 +20,10 @@ export const Route = createFileRoute("/tours/$slug")({
   component: TourDetails,
 });
 
-type ItineraryDay = { day: number; title: string; details: string };
+type ItineraryDay = { day: number; title: string; details: string; image?: string | null; logistics?: string };
+type SmartAddon = { name: string; price: number; description?: string };
+type DestinationHighlight = { place: string; fact?: string; food?: string; activities?: string; image?: string | null };
+type TripFaq = { question: string; answer: string };
 type Tour = {
   id: string; title: string; slug: string; destination: string | null; vibe: string | null;
   group_type: string | null; description: string | null; short_description: string | null;
@@ -28,6 +31,12 @@ type Tour = {
   inclusions: string[] | null; exclusions: string[] | null; group_size: number | null;
   seats_available: number | null; best_season: string | null; difficulty: string | null;
   hero_image: string | null; gallery_images: string[] | null; departure_dates: string[] | null;
+  property_images: string[] | null;
+  smart_addons: SmartAddon[] | null;
+  destination_highlights: DestinationHighlight[] | null;
+  best_months_label: string | null;
+  best_months_description: string | null;
+  trip_faqs: TripFaq[] | null;
 };
 type Addon = { id: string; name: string; description: string | null; price: number; required: boolean };
 type Faq = { id: string; question: string; answer: string | null };
