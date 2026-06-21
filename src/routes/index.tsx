@@ -10,6 +10,8 @@ import { IndiaMap } from "@/components/home/IndiaMap";
 import { SafetyTrust } from "@/components/home/SafetyTrust";
 import { FloatingPhotos } from "@/components/home/FloatingPhotos";
 import { SeasonalTours } from "@/components/home/SeasonalTours";
+import { ConversionPlanners } from "@/components/home/ConversionPlanners";
+import { JourneyExplorer } from "@/components/home/JourneyExplorer";
 import { FAQPreview } from "@/components/home/FAQPreview";
 import { DESTINATIONS } from "@/lib/destinations";
 import { BRAND, MONTHS, waLink } from "@/lib/brand";
