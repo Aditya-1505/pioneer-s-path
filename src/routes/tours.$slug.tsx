@@ -196,7 +196,39 @@ function TourDetails() {
             <p className="mt-3 leading-relaxed text-muted-foreground">{tour.description}</p>
           </Reveal>
 
-          {/* Itinerary */}
+          {/* Accommodation Showcase */}
+          {tour.property_images && tour.property_images.length > 0 && (
+            <div className="mt-10">
+              <h2 className="font-display text-2xl font-bold">Where You'll Stay</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Verified properties — handpicked for comfort, location and reviews.</p>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {tour.property_images.map((img, i) => (
+                  <div key={i} className="group relative overflow-hidden rounded-2xl border bg-card">
+                    <img src={img} alt={`Accommodation ${i + 1}`} loading="lazy"
+                      className="h-48 w-full object-cover transition duration-500 group-hover:scale-105" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* When to Go */}
+          {(tour.best_months_label || tour.best_months_description) && (
+            <div className="mt-10 overflow-hidden rounded-3xl border bg-gradient-to-br from-secondary/10 via-card to-primary/5 p-6 sm:p-8">
+              <div className="flex items-start gap-3">
+                <CalendarDays className="size-6 shrink-0 text-secondary" />
+                <div>
+                  <h2 className="font-display text-2xl font-bold">When to Go</h2>
+                  {tour.best_months_label && <p className="mt-1 font-semibold text-secondary">{tour.best_months_label}</p>}
+                  {tour.best_months_description && (
+                    <p className="mt-2 leading-relaxed text-foreground/85">{tour.best_months_description}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Itinerary — enhanced with per-day image + logistics */}
           {tour.itinerary && tour.itinerary.length > 0 && (
             <div className="mt-10">
               <h2 className="font-display text-2xl font-bold">Day-by-Day Itinerary</h2>
@@ -207,11 +239,57 @@ function TourDetails() {
                     <span className="absolute -left-[34px] flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
                       {d.day}
                     </span>
-                    <h3 className="font-semibold">{d.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{d.details}</p>
+                    <div className="rounded-2xl border bg-card p-4 shadow-sm">
+                      <h3 className="font-display text-lg font-semibold">{d.title}</h3>
+                      {d.logistics && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                          🚗 {d.logistics}
+                        </div>
+                      )}
+                      {d.image && (
+                        <img src={d.image} alt={d.title} loading="lazy"
+                          className="mt-3 h-56 w-full rounded-xl object-cover" />
+                      )}
+                      <p className="mt-3 text-sm text-muted-foreground">{d.details}</p>
+                    </div>
                   </motion.li>
                 ))}
               </ol>
+              {/* Connect CTA after itinerary */}
+              <ConnectCTA
+                title="Questions about this itinerary?"
+                subtitle="Chat with a trip expert in minutes — customise pace, stops or dates."
+                message={`Hi ${BRAND.name}! I have a few questions about the ${tour.title} itinerary.`}
+              />
+            </div>
+          )}
+
+          {/* Destination Deep-Dive */}
+          {tour.destination_highlights && tour.destination_highlights.length > 0 && (
+            <div className="mt-10">
+              <h2 className="font-display text-2xl font-bold">Destination Deep-Dive</h2>
+              <p className="mt-1 text-sm text-muted-foreground">Places you'll cover, what makes each special, and what locals love.</p>
+              <div className="mt-5 grid gap-4 sm:grid-cols-2">
+                {tour.destination_highlights.map((h, i) => (
+                  <div key={i} className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+                    {h.image && (
+                      <img src={h.image} alt={h.place} loading="lazy" className="h-44 w-full object-cover" />
+                    )}
+                    <div className="p-5">
+                      <h3 className="flex items-center gap-2 font-display text-lg font-semibold">
+                        <MapPin className="size-4 text-primary" /> {h.place}
+                      </h3>
+                      {h.fact && <p className="mt-2 text-sm text-muted-foreground">{h.fact}</p>}
+                      {h.food && (
+                        <p className="mt-3 text-xs"><span className="font-semibold text-secondary">Must-try food: </span>{h.food}</p>
+                      )}
+                      {h.activities && (
+                        <p className="mt-1 text-xs"><span className="font-semibold text-primary">Activities: </span>{h.activities}</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
