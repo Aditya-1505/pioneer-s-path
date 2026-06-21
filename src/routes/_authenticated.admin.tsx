@@ -334,21 +334,24 @@ function AdminPage() {
                 { key: "rating", label: "Rating (1-5)", type: "number" },
                 { key: "review", label: "Review", type: "textarea" },
                 { key: "trip_name", label: "Trip Name" },
-                { key: "photo_url", label: "Photo URL" },
-                { key: "video_url", label: "Video URL" },
+                { key: "photo_url", label: "Customer Avatar", type: "image", bucket: "testimonials", hint: "Small headshot shown beside the review." },
+                { key: "attached_image", label: "Attached Photo / Screenshot", type: "image", bucket: "testimonials", hint: "Optional — photo from the trip, or a WhatsApp review screenshot, shown inside the testimonial card." },
+                { key: "video_url", label: "Video URL", hint: "Optional video review URL (MP4)." },
               ]}
             />
           )}
           {active === "gallery" && (
             <SimpleCrud table="gallery" title="Gallery"
               columns={[
-                { key: "title", label: "Title" }, { key: "destination", label: "Destination" },
+                { key: "title", label: "Title" }, { key: "location_tag", label: "Location" },
                 { key: "category", label: "Category" }, { key: "image_url", label: "Image" },
               ]}
               fields={[
-                { key: "title", label: "Title" }, { key: "destination", label: "Destination" },
-                { key: "category", label: "Category" },
-                { key: "image_url", label: "Image URL", required: true },
+                { key: "title", label: "Title" },
+                { key: "location_tag", label: "Location Tag", required: true, hint: "e.g. Goa, Spiti, Kerala — used as a filter chip on the Gallery page." },
+                { key: "destination", label: "Destination (legacy)", hint: "Optional alias kept for backwards compatibility." },
+                { key: "category", label: "Category", hint: "e.g. Mountains, Beaches, Adventure" },
+                { key: "image_url", label: "Image", type: "image", bucket: "gallery", required: true },
                 { key: "video_url", label: "Video URL" },
               ]}
             />
@@ -363,7 +366,7 @@ function AdminPage() {
                 { key: "title", label: "Title", required: true },
                 { key: "slug", label: "Slug", required: true },
                 { key: "category", label: "Category" },
-                { key: "cover_image", label: "Cover Image URL" },
+                { key: "cover_image", label: "Cover Image", type: "image", bucket: "blogs" },
                 { key: "meta_title", label: "Meta Title" },
                 { key: "meta_description", label: "Meta Description" },
                 { key: "content", label: "Content", type: "textarea" },
