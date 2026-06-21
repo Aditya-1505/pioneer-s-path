@@ -27,11 +27,10 @@ const FALLBACK: Testimonial[] = [
 export function Testimonials() {
   const [items, setItems] = useState<Testimonial[]>([]);
   useEffect(() => {
-    supabase
-      .from("testimonials")
-      .select("id,customer_name,rating,review,trip_name,photo_url,video_url")
+    (supabase.from("testimonials") as any)
+      .select("id,customer_name,rating,review,trip_name,photo_url,video_url,attached_image")
       .order("created_at", { ascending: false })
-      .then(({ data }) => setItems((data as Testimonial[]) ?? []));
+      .then(({ data }: { data: unknown }) => setItems((data as Testimonial[]) ?? []));
   }, []);
 
   const list = items.length ? items : FALLBACK;
