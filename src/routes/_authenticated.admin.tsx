@@ -398,7 +398,7 @@ function AdminPage() {
               fields={[
                 { key: "name", label: "Name", required: true },
                 { key: "role", label: "Role" },
-                { key: "image_url", label: "Photo URL" },
+                { key: "image_url", label: "Photo", type: "image", bucket: "gallery" },
                 { key: "description", label: "Description", type: "textarea" },
               ]}
             />
