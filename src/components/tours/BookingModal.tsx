@@ -78,7 +78,7 @@ export function BookingModal({
       tour_id: tour.id,
       tour_title: tour.title,
       name: parsed.data.name,
-      email: parsed.data.email,
+      email: parsed.data.email || null,
       phone: parsed.data.phone,
       travelers,
       departure_date: departureDate || null,
