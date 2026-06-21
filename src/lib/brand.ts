@@ -10,17 +10,24 @@ export const BRAND = {
   upiId: "thepioneertours@upi",
 } as const;
 
-export const NAV_LINKS = [
+export type NavItem = { label: string; to?: string; children?: { label: string; to: string }[] };
+
+export const NAV_LINKS: NavItem[] = [
   { label: "Home", to: "/" },
   { label: "Tours", to: "/tours" },
   { label: "Plan My Trip", to: "/custom-planner" },
   { label: "Surprise Trips", to: "/surprise-planner" },
-  { label: "Gallery", to: "/gallery" },
-  { label: "Blog", to: "/blog" },
+  {
+    label: "Travel Diaries",
+    children: [
+      { label: "Gallery", to: "/gallery" },
+      { label: "Blog", to: "/blog" },
+    ],
+  },
   { label: "FAQ", to: "/faq" },
   { label: "About", to: "/about" },
   { label: "Contact", to: "/contact" },
-] as const;
+];
 
 export function waLink(message: string) {
   return `https://wa.me/${BRAND.whatsapp}?text=${encodeURIComponent(message)}`;
