@@ -129,17 +129,35 @@ export function Navbar() {
             className="glass mx-4 mt-2 overflow-hidden rounded-2xl lg:hidden"
           >
             <div className="flex flex-col p-3">
-              {NAV_LINKS.map((l) => (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className="rounded-xl px-4 py-3 text-sm font-medium hover:bg-accent"
-                  activeProps={{ className: "text-primary font-semibold" }}
-                  activeOptions={{ exact: l.to === "/" }}
-                >
-                  {l.label}
-                </Link>
-              ))}
+              {NAV_LINKS.flatMap((l) =>
+                l.children
+                  ? [
+                      <div key={l.label} className="px-4 pt-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        {l.label}
+                      </div>,
+                      ...l.children.map((c) => (
+                        <Link
+                          key={c.to}
+                          to={c.to}
+                          className="rounded-xl px-4 py-3 text-sm font-medium hover:bg-accent"
+                          activeProps={{ className: "text-primary font-semibold" }}
+                        >
+                          {c.label}
+                        </Link>
+                      )),
+                    ]
+                  : [
+                      <Link
+                        key={l.to}
+                        to={l.to!}
+                        className="rounded-xl px-4 py-3 text-sm font-medium hover:bg-accent"
+                        activeProps={{ className: "text-primary font-semibold" }}
+                        activeOptions={{ exact: l.to === "/" }}
+                      >
+                        {l.label}
+                      </Link>,
+                    ],
+              )}
 
               <div className="my-2 h-px bg-border" />
 
