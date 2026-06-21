@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BRAND, BUDGETS, GROUP_TYPES, TRAVEL_VIBES, waLink } from "@/lib/brand";
 import { recommendDestinations } from "@/lib/destinations";
 import { usePrefill } from "@/hooks/use-prefill";
+import { ConnectCTA } from "@/components/layout/ConnectCTA";
 
 export const Route = createFileRoute("/custom-planner")({
   head: () =>
