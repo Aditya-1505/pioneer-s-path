@@ -19,7 +19,13 @@ import { usePrefill } from "@/hooks/use-prefill";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
+  email: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), { message: "Invalid email" }),
   phone: z.string().trim().min(8, "Enter a valid phone").max(20),
   message: z.string().trim().max(1000).optional(),
 });
@@ -72,7 +78,7 @@ export function BookingModal({
       tour_id: tour.id,
       tour_title: tour.title,
       name: parsed.data.name,
-      email: parsed.data.email,
+      email: parsed.data.email || null,
       phone: parsed.data.phone,
       travelers,
       departure_date: departureDate || null,
@@ -118,29 +124,31 @@ export function BookingModal({
             </DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label htmlFor="b-name">Full name</Label>
+                <Label htmlFor="b-name">Full name *</Label>
                 <Input
                   id="b-name"
+                  required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="b-email">Email</Label>
+                  <Label htmlFor="b-phone">Phone *</Label>
+                  <Input
+                    id="b-phone"
+                    required
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="b-email">Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
                   <Input
                     id="b-email"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="b-phone">Phone</Label>
-                  <Input
-                    id="b-phone"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   />
                 </div>
               </div>

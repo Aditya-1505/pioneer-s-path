@@ -227,7 +227,7 @@ function AdminPage() {
                 { key: "region", label: "Region / Subtitle" },
                 { key: "latitude", label: "Latitude", type: "number", required: true, hint: "India range ~8 to 37 (e.g. Manali 32.24)" },
                 { key: "longitude", label: "Longitude", type: "number", required: true, hint: "India range ~68 to 97 (e.g. Manali 77.19)" },
-                { key: "image_url", label: "Image URL", type: "image" },
+                { key: "image_url", label: "Image", type: "image", bucket: "gallery" },
                 { key: "description", label: "Description", type: "textarea" },
                 { key: "tour_id", label: "Linked Tour", type: "select", hint: "Optional — clicking the pin opens this tour." },
                 { key: "is_visible", label: "Visible on map", type: "checkbox" },
@@ -247,7 +247,7 @@ function AdminPage() {
                 { key: "title", label: "Title", required: true, hint: "e.g. Winter in Kashmir" },
                 { key: "season", label: "Season", hint: "e.g. Winter, Summer, Monsoon" },
                 { key: "subtitle", label: "Subtitle", type: "textarea" },
-                { key: "banner_image", label: "Banner Image URL", type: "image" },
+                { key: "banner_image", label: "Banner Image", type: "image", bucket: "tours" },
                 { key: "display_start", label: "Display from", type: "date" },
                 { key: "display_end", label: "Display until", type: "date" },
                 { key: "tour_id", label: "Featured Tour", type: "select" },
@@ -334,21 +334,24 @@ function AdminPage() {
                 { key: "rating", label: "Rating (1-5)", type: "number" },
                 { key: "review", label: "Review", type: "textarea" },
                 { key: "trip_name", label: "Trip Name" },
-                { key: "photo_url", label: "Photo URL" },
-                { key: "video_url", label: "Video URL" },
+                { key: "photo_url", label: "Customer Avatar", type: "image", bucket: "testimonials", hint: "Small headshot shown beside the review." },
+                { key: "attached_image", label: "Attached Photo / Screenshot", type: "image", bucket: "testimonials", hint: "Optional — photo from the trip, or a WhatsApp review screenshot, shown inside the testimonial card." },
+                { key: "video_url", label: "Video URL", hint: "Optional video review URL (MP4)." },
               ]}
             />
           )}
           {active === "gallery" && (
             <SimpleCrud table="gallery" title="Gallery"
               columns={[
-                { key: "title", label: "Title" }, { key: "destination", label: "Destination" },
+                { key: "title", label: "Title" }, { key: "location_tag", label: "Location" },
                 { key: "category", label: "Category" }, { key: "image_url", label: "Image" },
               ]}
               fields={[
-                { key: "title", label: "Title" }, { key: "destination", label: "Destination" },
-                { key: "category", label: "Category" },
-                { key: "image_url", label: "Image URL", required: true },
+                { key: "title", label: "Title" },
+                { key: "location_tag", label: "Location Tag", required: true, hint: "e.g. Goa, Spiti, Kerala — used as a filter chip on the Gallery page." },
+                { key: "destination", label: "Destination (legacy)", hint: "Optional alias kept for backwards compatibility." },
+                { key: "category", label: "Category", hint: "e.g. Mountains, Beaches, Adventure" },
+                { key: "image_url", label: "Image", type: "image", bucket: "gallery", required: true },
                 { key: "video_url", label: "Video URL" },
               ]}
             />
@@ -363,7 +366,7 @@ function AdminPage() {
                 { key: "title", label: "Title", required: true },
                 { key: "slug", label: "Slug", required: true },
                 { key: "category", label: "Category" },
-                { key: "cover_image", label: "Cover Image URL" },
+                { key: "cover_image", label: "Cover Image", type: "image", bucket: "blogs" },
                 { key: "meta_title", label: "Meta Title" },
                 { key: "meta_description", label: "Meta Description" },
                 { key: "content", label: "Content", type: "textarea" },
@@ -395,7 +398,7 @@ function AdminPage() {
               fields={[
                 { key: "name", label: "Name", required: true },
                 { key: "role", label: "Role" },
-                { key: "image_url", label: "Photo URL" },
+                { key: "image_url", label: "Photo", type: "image", bucket: "gallery" },
                 { key: "description", label: "Description", type: "textarea" },
               ]}
             />

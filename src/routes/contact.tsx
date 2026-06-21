@@ -34,7 +34,7 @@ function ContactPage() {
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
-    if (!form.phone.trim() && !form.email.trim()) return toast.error("Add a phone or email so we can reach you");
+    if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
     if (!form.message.trim()) return toast.error("Please add a message");
     setLoading(true);
     const { error } = await supabase.from("inquiries").insert({
@@ -110,11 +110,11 @@ function ContactPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <Label htmlFor="phone">Phone / WhatsApp</Label>
-                <Input id="phone" className="mt-1.5" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                <Label htmlFor="phone">Phone / WhatsApp *</Label>
+                <Input id="phone" className="mt-1.5" required value={form.phone} onChange={(e) => set("phone", e.target.value)} />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
                 <Input id="email" type="email" className="mt-1.5" value={form.email} onChange={(e) => set("email", e.target.value)} />
               </div>
             </div>

@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { BRAND, BUDGETS, GROUP_TYPES, TRAVEL_VIBES, waLink } from "@/lib/brand";
 import { recommendDestinations } from "@/lib/destinations";
 import { usePrefill } from "@/hooks/use-prefill";
+import { ConnectCTA } from "@/components/layout/ConnectCTA";
 
 export const Route = createFileRoute("/custom-planner")({
   head: () =>
@@ -71,7 +72,7 @@ function CustomPlanner() {
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
-    if (!form.phone.trim() && !form.email.trim()) return toast.error("Add a phone or email so we can reach you");
+    if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
     setLoading(true);
     const { error } = await supabase.from("custom_trip_requests").insert({
       name: form.name,
@@ -241,11 +242,11 @@ function CustomPlanner() {
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <Label htmlFor="phone">Phone / WhatsApp</Label>
-                      <Input id="phone" className="mt-1.5" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                      <Label htmlFor="phone">Phone / WhatsApp *</Label>
+                      <Input id="phone" className="mt-1.5" required value={form.phone} onChange={(e) => set("phone", e.target.value)} />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
                       <Input id="email" type="email" className="mt-1.5" value={form.email} onChange={(e) => set("email", e.target.value)} />
                     </div>
                   </div>
@@ -274,6 +275,13 @@ function CustomPlanner() {
             )}
           </div>
         </div>
+      </div>
+      <div className="mx-auto max-w-3xl px-4 pb-16">
+        <ConnectCTA
+          title="Prefer to chat instead?"
+          subtitle="Skip the form — speak to a trip designer right now."
+          message={`Hi ${BRAND.name}! I'd like help planning a custom trip.`}
+        />
       </div>
     </main>
   );

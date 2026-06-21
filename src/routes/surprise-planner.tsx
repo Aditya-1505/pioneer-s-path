@@ -47,7 +47,7 @@ function SurprisePlanner() {
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
     if (!form.occasion) return toast.error("Pick the occasion");
-    if (!form.phone.trim() && !form.email.trim()) return toast.error("Add a phone or email so we can reach you");
+    if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
     setLoading(true);
     const { error } = await supabase.from("surprise_trip_requests").insert({
       name: form.name,
@@ -178,12 +178,12 @@ function SurprisePlanner() {
                 <Input id="name" className="mt-1.5" value={form.name} onChange={(e) => set("name", e.target.value)} />
               </div>
               <div>
-                <Label htmlFor="phone">Phone / WhatsApp</Label>
-                <Input id="phone" className="mt-1.5" value={form.phone} onChange={(e) => set("phone", e.target.value)} />
+                <Label htmlFor="phone">Phone / WhatsApp *</Label>
+                <Input id="phone" className="mt-1.5" required value={form.phone} onChange={(e) => set("phone", e.target.value)} />
               </div>
             </div>
             <div>
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
               <Input id="email" type="email" className="mt-1.5" value={form.email} onChange={(e) => set("email", e.target.value)} />
             </div>
             <div>

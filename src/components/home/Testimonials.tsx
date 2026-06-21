@@ -12,25 +12,25 @@ type Testimonial = {
   trip_name: string | null;
   photo_url: string | null;
   video_url: string | null;
+  attached_image: string | null;
 };
 
 const FALLBACK: Testimonial[] = [
-  { id: "1", customer_name: "Ananya & Rohit", rating: 5, review: "Our Spiti road trip was flawless — every stay, every meal sorted. We just showed up and made memories!", trip_name: "Spiti Valley", photo_url: null, video_url: null },
-  { id: "2", customer_name: "The Mehta Family", rating: 5, review: "Travelling with kids felt effortless. The coordinators were patient, fun and super organized.", trip_name: "Kerala", photo_url: null, video_url: null },
-  { id: "3", customer_name: "Priya S.", rating: 5, review: "My solo Kashmir trip felt safe and luxurious. Worth every rupee. Highly recommend Pioneer!", trip_name: "Kashmir", photo_url: null, video_url: null },
-  { id: "4", customer_name: "Karan & Friends", rating: 5, review: "Manali with the gang was unforgettable. Zero planning stress, all party. 10/10!", trip_name: "Manali", photo_url: null, video_url: null },
-  { id: "5", customer_name: "Sneha R.", rating: 5, review: "Goa was perfectly paced — beaches, cafes and the right amount of chaos. Loved it.", trip_name: "Goa", photo_url: null, video_url: null },
-  { id: "6", customer_name: "Vivek & Meera", rating: 5, review: "Our anniversary surprise trip left us speechless. They thought of every little detail.", trip_name: "Surprise Trip", photo_url: null, video_url: null },
+  { id: "1", customer_name: "Ananya & Rohit", rating: 5, review: "Our Spiti road trip was flawless — every stay, every meal sorted. We just showed up and made memories!", trip_name: "Spiti Valley", photo_url: null, video_url: null, attached_image: null },
+  { id: "2", customer_name: "The Mehta Family", rating: 5, review: "Travelling with kids felt effortless. The coordinators were patient, fun and super organized.", trip_name: "Kerala", photo_url: null, video_url: null, attached_image: null },
+  { id: "3", customer_name: "Priya S.", rating: 5, review: "My solo Kashmir trip felt safe and luxurious. Worth every rupee. Highly recommend Pioneer!", trip_name: "Kashmir", photo_url: null, video_url: null, attached_image: null },
+  { id: "4", customer_name: "Karan & Friends", rating: 5, review: "Manali with the gang was unforgettable. Zero planning stress, all party. 10/10!", trip_name: "Manali", photo_url: null, video_url: null, attached_image: null },
+  { id: "5", customer_name: "Sneha R.", rating: 5, review: "Goa was perfectly paced — beaches, cafes and the right amount of chaos. Loved it.", trip_name: "Goa", photo_url: null, video_url: null, attached_image: null },
+  { id: "6", customer_name: "Vivek & Meera", rating: 5, review: "Our anniversary surprise trip left us speechless. They thought of every little detail.", trip_name: "Surprise Trip", photo_url: null, video_url: null, attached_image: null },
 ];
 
 export function Testimonials() {
   const [items, setItems] = useState<Testimonial[]>([]);
   useEffect(() => {
-    supabase
-      .from("testimonials")
-      .select("id,customer_name,rating,review,trip_name,photo_url,video_url")
+    (supabase.from("testimonials") as any)
+      .select("id,customer_name,rating,review,trip_name,photo_url,video_url,attached_image")
       .order("created_at", { ascending: false })
-      .then(({ data }) => setItems((data as Testimonial[]) ?? []));
+      .then(({ data }: { data: unknown }) => setItems((data as Testimonial[]) ?? []));
   }, []);
 
   const list = items.length ? items : FALLBACK;
@@ -63,6 +63,21 @@ export function Testimonials() {
                 <blockquote className="mt-3 text-sm leading-relaxed text-foreground/90">
                   “{t.review}”
                 </blockquote>
+                {t.attached_image && (
+                  <a
+                    href={t.attached_image}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 block overflow-hidden rounded-2xl border"
+                  >
+                    <img
+                      src={t.attached_image}
+                      alt={`${t.customer_name} on their trip`}
+                      loading="lazy"
+                      className="max-h-72 w-full object-cover transition duration-500 hover:scale-105"
+                    />
+                  </a>
+                )}
                 <figcaption className="mt-4 flex items-center gap-3">
                   {t.photo_url ? (
                     <img src={t.photo_url} alt={t.customer_name} className="size-9 rounded-full object-cover" />
