@@ -1,45 +1,76 @@
-# Implementation Plan
+# Pioneer Tours — Architectural Upgrade Plan
 
-This is a large scope (~13 feature areas). I'll group it into 4 phases so each can be verified before moving on. Confirm the phasing — or tell me to do it all in one go — and I'll start.
+Large scope. I'll ship it in 5 focused phases so each phase is reviewable and the app stays working between phases.
 
-## Phase 1 — Backend foundation (DB + realtime)
-Single migration adding:
-- `is_read boolean default false`, `read_at timestamptz` on `inquiries`, `bookings`, `custom_trip_requests`, `surprise_trip_requests`, `planner_requests`, `newsletter_subscribers` (only those that already exist — I'll verify table names first).
-- `notifications` table (id, title, message, type, related_record_id, related_table, is_read, created_at) + GRANTs + RLS (staff-only read/update via `has_role`).
-- `lead_priority` generated/derived column or view based on budget thresholds (hot >50k red, warm 20–50k orange, cold <20k blue).
-- DB triggers on each source table → `INSERT INTO notifications` with the right `type`.
-- Enable Supabase Realtime publication on `notifications` + source tables.
-- Add tables to `supabase_realtime` publication.
+---
 
-## Phase 2 — Admin dashboard
-- Sidebar badges (live unread counts per section, subscribed via realtime).
-- Dashboard summary cards: Total Requests, Unread, New Today, Converted Leads.
-- Bell icon in admin header → dropdown (unread badge, list, mark one / mark all read, click → open record).
-- Activity Center page (chronological feed across all submission types).
-- "View Website" button (top-right, opens `/` in new tab).
-- Lead priority badges in all CRM tables.
-- Marking a record viewed sets `is_read=true, read_at=now()`.
+## Phase 1 — Database & Storage Foundation
 
-## Phase 3 — Public site fixes
-- **Videos**: audit every `<video>` usage, ensure `autoPlay muted loop playsInline`; hero fade transitions; testimonial fullscreen + controls; gallery hover-play / leave-pause.
-- **India Map**: replace current `IndiaMap.tsx` with `react-simple-maps` (zoom/pan/hover/click) showing Goa, Kerala, Manali, Spiti, Kashmir, Ladakh, Meghalaya; popup card with name, starting price, duration, seats, "View Trip" button (data from `tours` table).
-- **Blog detail**: enhance `/blog/$slug` with author, reading time, related/recent articles, share buttons (WhatsApp/Facebook/LinkedIn/Copy), dynamic OG + JSON-LD Article schema.
-- **Cancellation CTA** in "Travel With Total Peace" section linking to `/cancellation`.
+**Migration `db/migrations/02_rich_media_and_schema.sql`:**
+- `tours`: add `property_images jsonb default '[]'`, `smart_addons jsonb default '[]'`, `destination_highlights jsonb default '[]'`, `best_months_label text`, `best_months_description text`, `trip_faqs jsonb default '[]'`. Keep existing `itinerary jsonb` but document new per-day shape: `{ day, title, details, image, logistics }`.
+- `gallery`: add `location_tag text`, index on it.
+- `testimonials`: add `attached_image text`.
+- Create Supabase Storage buckets via tool: `tours`, `gallery`, `properties`, `blogs`, `testimonials` (public read).
+- RLS policies on `storage.objects`: public SELECT, authenticated INSERT/UPDATE/DELETE (admins only via has_role check).
 
-## Phase 4 — Legal pages + mobile UX
-- Replace `ComingSoon` on `/terms`, `/privacy`, `/cancellation` with full long-form content (generic India tour-operator template — user can edit).
-- Mobile sticky CTAs: WhatsApp, Call, Plan My Trip (always visible on mobile).
-- Optional bottom nav (Home / Trips / Planner / Contact / WhatsApp) — included unless you'd rather skip it.
+**Shared uploader component `src/components/admin/ImageUploader.tsx`:**
+- Drag-and-drop + click-to-select, supports single or multi.
+- Uploads to chosen bucket, returns public URL(s), shows previews with remove buttons.
+- Used by every admin form.
 
-## Technical notes
-- All notification creation is DB-trigger driven so no app code can forget to fire it.
-- Realtime subscriptions live in a single `useNotifications` hook + per-section `useUnreadCount(table)` hook.
-- Lead priority is computed in SQL (function) so admin tables and dashboards agree.
-- No external services (no email/SMS/push); strictly in-app.
+## Phase 2 — Admin Panel Upgrades
 
-## Open questions
-1. Legal copy: should I draft generic templates (and you fill blanks like company address/GST/contact), or do you have existing text to paste in?
-2. Bottom mobile nav — include it, or stick to the floating CTAs only?
-3. "Converted Leads" — define as bookings with `status='confirmed'`? Or a separate flag?
+- `ToursAdmin.tsx`: replace `hero_image`, `gallery_images`, `property_images` text inputs with `ImageUploader`. Add new editors:
+  - Per-itinerary-day: image upload + logistics text input.
+  - Smart Add-ons repeater (label, price, description).
+  - Destination Highlights repeater (place, fact, must-try food, activities, photo).
+  - Best Months (label + description textarea).
+  - Trip FAQs repeater (question, answer).
+- `GalleryAdmin` / `SimpleCrud` gallery section: ImageUploader + `location_tag` field.
+- Blogs & Properties admin: ImageUploader for cover/featured images.
+- Testimonials admin: ImageUploader for `attached_image`.
 
-Reply with any tweaks (or just "go") and I'll start with Phase 1.
+## Phase 3 — Homepage Rearrangement
+
+`src/routes/index.tsx` new section order:
+1. Hero
+2. **Side-by-side planners**: `PlanWizard` + Surprise (new wrapper `ConversionPlanners.tsx`, `md:grid-cols-2`)
+3. Featured Tours
+4. **Testimonials / Wall of Love** (moved up)
+5. **Unified Tour Explorer** `JourneyExplorer.tsx` with tabs: Featured | Trending | In Season (merges featured + seasonal)
+6. India Map
+7. FAQ Preview
+8. Safety/Trust + Floating Photos
+9. Footer
+
+Remove standalone `SeasonalTours` placement (it becomes a tab inside JourneyExplorer).
+
+## Phase 4 — Tour Detail Page Overhaul
+
+`src/routes/tours.$slug.tsx`:
+- **Accommodation Showcase** grid from `property_images`.
+- **Enhanced Itinerary**: each day card shows `image` + logistics badge `🚗 A → B | km | hrs`.
+- **Destination Deep-Dive** card grid from `destination_highlights`.
+- **When to Go** banner from `best_months_*`.
+- **Smart Add-ons** checkboxes near pricing (replaces generic `tour_addons` fetch).
+- **Trip FAQs** accordion at bottom from `trip_faqs`.
+- **Connect CTAs** (WhatsApp / Call) after pricing and after itinerary.
+
+## Phase 5 — Forms, Nav & Gallery
+
+- Forms (`contact`, `custom-planner`, `surprise-planner`, `BookingModal`): only Name + Phone required; email optional; remove any auth gate. Keep prefill if signed in.
+- Inline Connect CTAs in `custom-planner` and after pricing blocks.
+- Navbar: collapse Gallery + Blog into "Travel Diaries" dropdown.
+- Gallery page: fetch distinct `location_tag` values → filter chips; filter masonry grid by selected tag.
+- Testimonials component: render `attached_image` when present.
+
+---
+
+## Technical Notes
+
+- All new `jsonb` columns default `'[]'` / NULL so existing rows keep working.
+- Storage uploads use the browser `supabase` client; admin route is already auth-gated.
+- The Activity Center, NotificationBell, and pre-existing systems remain untouched.
+- I'll keep changes additive — no destructive renames of existing columns.
+
+After you approve, I'll begin with Phase 1 (migration + uploader). Each phase is a separate response so you can review and test.
