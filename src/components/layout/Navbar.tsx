@@ -50,17 +50,21 @@ export function Navbar() {
         </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
-          {NAV_LINKS.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className="rounded-full px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
-              activeProps={{ className: "text-primary font-semibold" }}
-              activeOptions={{ exact: l.to === "/" }}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((l) =>
+            l.children ? (
+              <NavDropdown key={l.label} label={l.label} items={l.children} />
+            ) : (
+              <Link
+                key={l.to}
+                to={l.to!}
+                className="rounded-full px-3 py-2 text-sm font-medium text-foreground/80 transition-colors hover:bg-accent hover:text-foreground"
+                activeProps={{ className: "text-primary font-semibold" }}
+                activeOptions={{ exact: l.to === "/" }}
+              >
+                {l.label}
+              </Link>
+            ),
+          )}
         </div>
 
         <div className="flex items-center gap-2">
