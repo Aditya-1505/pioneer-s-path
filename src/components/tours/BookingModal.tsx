@@ -19,7 +19,13 @@ import { usePrefill } from "@/hooks/use-prefill";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name").max(100),
-  email: z.string().trim().email("Invalid email").max(255),
+  email: z
+    .string()
+    .trim()
+    .max(255)
+    .optional()
+    .or(z.literal(""))
+    .refine((v) => !v || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), { message: "Invalid email" }),
   phone: z.string().trim().min(8, "Enter a valid phone").max(20),
   message: z.string().trim().max(1000).optional(),
 });
