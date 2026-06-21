@@ -14,6 +14,7 @@ import { BRAND, waLink } from "@/lib/brand";
 import { inr } from "@/routes/tours.index";
 import { BookingModal } from "@/components/tours/BookingModal";
 import { Lightbox } from "@/components/tours/Lightbox";
+import { ConnectCTA } from "@/components/layout/ConnectCTA";
 
 export const Route = createFileRoute("/tours/$slug")({
   head: () => pageHead("Tour Details", "Immersive day-by-day itinerary, pricing & booking for your next adventure."),
