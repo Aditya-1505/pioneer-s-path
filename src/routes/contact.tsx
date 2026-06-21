@@ -34,7 +34,7 @@ function ContactPage() {
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
-    if (!form.phone.trim() && !form.email.trim()) return toast.error("Add a phone or email so we can reach you");
+    if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
     if (!form.message.trim()) return toast.error("Please add a message");
     setLoading(true);
     const { error } = await supabase.from("inquiries").insert({
