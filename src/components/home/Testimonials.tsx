@@ -12,6 +12,7 @@ type Testimonial = {
   trip_name: string | null;
   photo_url: string | null;
   video_url: string | null;
+  attached_image: string | null;
 };
 
 const FALLBACK: Testimonial[] = [
