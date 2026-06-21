@@ -63,6 +63,21 @@ export function Testimonials() {
                 <blockquote className="mt-3 text-sm leading-relaxed text-foreground/90">
                   “{t.review}”
                 </blockquote>
+                {t.attached_image && (
+                  <a
+                    href={t.attached_image}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-4 block overflow-hidden rounded-2xl border"
+                  >
+                    <img
+                      src={t.attached_image}
+                      alt={`${t.customer_name} on their trip`}
+                      loading="lazy"
+                      className="max-h-72 w-full object-cover transition duration-500 hover:scale-105"
+                    />
+                  </a>
+                )}
                 <figcaption className="mt-4 flex items-center gap-3">
                   {t.photo_url ? (
                     <img src={t.photo_url} alt={t.customer_name} className="size-9 rounded-full object-cover" />
