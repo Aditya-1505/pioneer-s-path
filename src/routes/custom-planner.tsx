@@ -71,7 +71,7 @@ function CustomPlanner() {
 
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
-    if (!form.phone.trim() && !form.email.trim()) return toast.error("Add a phone or email so we can reach you");
+    if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
     setLoading(true);
     const { error } = await supabase.from("custom_trip_requests").insert({
       name: form.name,

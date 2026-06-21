@@ -47,7 +47,7 @@ function SurprisePlanner() {
   const submit = async () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
     if (!form.occasion) return toast.error("Pick the occasion");
-    if (!form.phone.trim() && !form.email.trim()) return toast.error("Add a phone or email so we can reach you");
+    if (!form.phone.trim()) return toast.error("Please enter a phone or WhatsApp number");
     setLoading(true);
     const { error } = await supabase.from("surprise_trip_requests").insert({
       name: form.name,
