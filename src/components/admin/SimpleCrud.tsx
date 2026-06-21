@@ -31,6 +31,7 @@ export type Field = {
   required?: boolean;
   options?: Option[];
   hint?: string;
+  bucket?: "tours" | "gallery" | "properties" | "blogs" | "testimonials";
 };
 
 type Row = Record<string, any>;
