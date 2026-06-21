@@ -124,29 +124,31 @@ export function BookingModal({
             </DialogHeader>
             <div className="space-y-3">
               <div>
-                <Label htmlFor="b-name">Full name</Label>
+                <Label htmlFor="b-name">Full name *</Label>
                 <Input
                   id="b-name"
+                  required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label htmlFor="b-email">Email</Label>
+                  <Label htmlFor="b-phone">Phone *</Label>
+                  <Input
+                    id="b-phone"
+                    required
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="b-email">Email <span className="text-xs text-muted-foreground">(optional)</span></Label>
                   <Input
                     id="b-email"
                     type="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="b-phone">Phone</Label>
-                  <Input
-                    id="b-phone"
-                    value={form.phone}
-                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
                   />
                 </div>
               </div>
