@@ -88,7 +88,7 @@ function TourDetails() {
       const { data } = await supabase
         .from("tours").select("*").eq("slug", slug).eq("status", "published").maybeSingle();
       if (!active) return;
-      const t = data as Tour | null;
+      const t = data as unknown as Tour | null;
       setTour(t);
       if (t?.departure_dates?.length) setDepartureDate(t.departure_dates[0]);
 
