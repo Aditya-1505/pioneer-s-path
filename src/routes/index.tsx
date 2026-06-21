@@ -64,8 +64,6 @@ function Home() {
       .then(({ data }) => setTours((data as Tour[]) ?? []));
   }, []);
 
-  const currentMonth = MONTHS[new Date().getMonth()];
-  const seasonal = DESTINATIONS.filter((d) => d.bestMonths.includes(currentMonth)).slice(0, 4);
 
   return (
     <main>
