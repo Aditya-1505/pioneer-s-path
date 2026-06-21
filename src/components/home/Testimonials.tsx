@@ -16,12 +16,12 @@ type Testimonial = {
 };
 
 const FALLBACK: Testimonial[] = [
-  { id: "1", customer_name: "Ananya & Rohit", rating: 5, review: "Our Spiti road trip was flawless — every stay, every meal sorted. We just showed up and made memories!", trip_name: "Spiti Valley", photo_url: null, video_url: null },
-  { id: "2", customer_name: "The Mehta Family", rating: 5, review: "Travelling with kids felt effortless. The coordinators were patient, fun and super organized.", trip_name: "Kerala", photo_url: null, video_url: null },
-  { id: "3", customer_name: "Priya S.", rating: 5, review: "My solo Kashmir trip felt safe and luxurious. Worth every rupee. Highly recommend Pioneer!", trip_name: "Kashmir", photo_url: null, video_url: null },
-  { id: "4", customer_name: "Karan & Friends", rating: 5, review: "Manali with the gang was unforgettable. Zero planning stress, all party. 10/10!", trip_name: "Manali", photo_url: null, video_url: null },
-  { id: "5", customer_name: "Sneha R.", rating: 5, review: "Goa was perfectly paced — beaches, cafes and the right amount of chaos. Loved it.", trip_name: "Goa", photo_url: null, video_url: null },
-  { id: "6", customer_name: "Vivek & Meera", rating: 5, review: "Our anniversary surprise trip left us speechless. They thought of every little detail.", trip_name: "Surprise Trip", photo_url: null, video_url: null },
+  { id: "1", customer_name: "Ananya & Rohit", rating: 5, review: "Our Spiti road trip was flawless — every stay, every meal sorted. We just showed up and made memories!", trip_name: "Spiti Valley", photo_url: null, video_url: null, attached_image: null },
+  { id: "2", customer_name: "The Mehta Family", rating: 5, review: "Travelling with kids felt effortless. The coordinators were patient, fun and super organized.", trip_name: "Kerala", photo_url: null, video_url: null, attached_image: null },
+  { id: "3", customer_name: "Priya S.", rating: 5, review: "My solo Kashmir trip felt safe and luxurious. Worth every rupee. Highly recommend Pioneer!", trip_name: "Kashmir", photo_url: null, video_url: null, attached_image: null },
+  { id: "4", customer_name: "Karan & Friends", rating: 5, review: "Manali with the gang was unforgettable. Zero planning stress, all party. 10/10!", trip_name: "Manali", photo_url: null, video_url: null, attached_image: null },
+  { id: "5", customer_name: "Sneha R.", rating: 5, review: "Goa was perfectly paced — beaches, cafes and the right amount of chaos. Loved it.", trip_name: "Goa", photo_url: null, video_url: null, attached_image: null },
+  { id: "6", customer_name: "Vivek & Meera", rating: 5, review: "Our anniversary surprise trip left us speechless. They thought of every little detail.", trip_name: "Surprise Trip", photo_url: null, video_url: null, attached_image: null },
 ];
 
 export function Testimonials() {
