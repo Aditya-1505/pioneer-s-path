@@ -124,15 +124,8 @@ function Home() {
         </div>
       </section>
 
-      {/* PLAN WIZARD */}
-      <section id="plan" className="mx-auto max-w-7xl px-4 py-20">
-        <Reveal className="mb-10 text-center">
-          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Smart Planner</span>
-          <h2 className="mt-2 font-display text-3xl font-bold sm:text-5xl">Plan My Trip in 60 Seconds</h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">Answer 4 quick questions and get instant destination matches + a personalized itinerary on WhatsApp.</p>
-        </Reveal>
-        <Reveal delay={0.1}><PlanWizard /></Reveal>
-      </section>
+      {/* SIDE-BY-SIDE CONVERSION PLANNERS */}
+      <ConversionPlanners />
 
       {/* FEATURED TOURS */}
       <section className="bg-muted/40 py-20">
@@ -177,30 +170,11 @@ function Home() {
         </div>
       </section>
 
-      {/* SEASONAL (DB-driven; falls back silently when empty) */}
-      <SeasonalTours />
+      {/* WALL OF LOVE — moved up to build trust early */}
+      <Testimonials />
 
-      {/* SEASONAL FALLBACK (static) */}
-      <section className="mx-auto max-w-7xl px-4 py-20">
-        <Reveal className="mb-10 text-center">
-          <span className="text-sm font-semibold uppercase tracking-wider text-secondary">Perfect for {currentMonth}</span>
-          <h2 className="mt-2 font-display text-3xl font-bold sm:text-5xl">In Season Right Now</h2>
-        </Reveal>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {(seasonal.length ? seasonal : DESTINATIONS.slice(0, 4)).map((d, i) => (
-            <Reveal key={d.slug} delay={i * 0.07}>
-              <Link to="/tours" className="group relative block h-64 overflow-hidden rounded-3xl">
-                <img src={d.image} alt={d.name} loading="lazy" className="size-full object-cover transition duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-                <div className="absolute bottom-4 left-4 text-white">
-                  <h3 className="font-display text-xl font-bold">{d.name}</h3>
-                  <p className="text-sm text-white/85">From ₹{d.priceFrom.toLocaleString("en-IN")}</p>
-                </div>
-              </Link>
-            </Reveal>
-          ))}
-        </div>
-      </section>
+      {/* UNIFIED TOUR EXPLORER — Featured / Trending / In Season */}
+      <JourneyExplorer />
 
       {/* INSPIRATION WALL */}
       <section className="overflow-hidden bg-secondary/5 py-16">
@@ -227,21 +201,6 @@ function Home() {
 
       {/* FLOATING PHOTOS + QUOTE CAROUSEL */}
       <FloatingPhotos />
-
-      {/* SURPRISE CTA */}
-      <section className="mx-auto max-w-7xl px-4 py-20">
-        <Reveal>
-          <div className="relative overflow-hidden rounded-3xl bg-[image:var(--gradient-sky)] p-10 text-center text-primary-foreground sm:p-16">
-            <Heart className="mx-auto size-10" />
-            <h2 className="mt-4 font-display text-3xl font-bold sm:text-5xl">Surprise Someone You Love</h2>
-            <p className="mx-auto mt-3 max-w-xl text-primary-foreground/90">Anniversaries, proposals, birthdays & honeymoons — we plan the secret, you collect the tears of joy.</p>
-            <Button asChild variant="sand" size="xl" className="mt-6"><Link to="/surprise-planner">Plan a Surprise Trip</Link></Button>
-          </div>
-        </Reveal>
-      </section>
-
-      {/* WALL OF LOVE — testimonials + video reviews */}
-      <Testimonials />
 
       {/* FAQ PREVIEW */}
       <FAQPreview />
